@@ -1,9 +1,7 @@
 import { AnimatePresence, motion } from "motion/react";
-
 import { useSnapshot } from "valtio/react";
 import { Store, store } from "~/store/Store";
 import { RadialCone } from "./RadialCone";
-import { range } from "~/utils/range";
 import { RadialSquare } from "./RadialSquare";
 import { AddCircleHalfDotIcon } from "../Icons/AddCircleHalfDotIcon";
 import { RemoveCircleHalfDotIcon } from "../Icons/RemoveCircleHalfDotIcon";
@@ -11,10 +9,10 @@ import { BendToolAddIcon } from "../Icons/BendToolAddIcon";
 import { BendToolRemoveIcon } from "../Icons/BendToolRemoveIcon";
 import { InfoIcon } from "../Icons/InfoIcon";
 import { VertexIconMove } from "../Icons/VertexMoveIcon";
+import { EdgeMoveIcon } from "../Icons/EdgeMoveIcon";
 
 const {
   //
-  n,
   innerRadius,
   outerRadius,
   innerStroke,
@@ -47,11 +45,9 @@ export function Radial() {
           <RadialSquare index={3} Icon={BendToolRemoveIcon} />
           <RadialSquare index={4} Icon={InfoIcon} />
 
-          <RadialSquare index={6} Icon={VertexIconMove} />
+          <RadialSquare index={5} Icon={EdgeMoveIcon} />
 
-          {/* {range(n - 3, (i) => (
-            <RadialSquare key={i} index={i + 3} />
-          ))} */}
+          <RadialSquare index={6} Icon={VertexIconMove} />
 
           {/* Inner circle - must stay above all other elements. */}
           <motion.circle

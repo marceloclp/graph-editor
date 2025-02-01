@@ -4,6 +4,8 @@ import { Cursor } from "./Cursor";
 import { Canvas } from "./Canvas";
 import { Radial } from "./Radial";
 import { subscribeKey } from "valtio/utils";
+import { onEdgeDragMove, onEdgeDragUp } from "~/ui/Edge/Edge";
+import { onVertexDragMove, onVertexDragUp } from "~/ui/Vertex/Vertex";
 
 export class Store {
   public static readonly Canvas = Canvas;
@@ -23,36 +25,62 @@ export class Store {
     const canvasY = y - this.canvas.panY;
     return { x: canvasX, y: canvasY };
   }
+
+  get isAddingVertex() {
+    return this.cursor.isAddingVertex;
+  }
+
+  get isRemovingVertex() {
+    return this.cursor.isRemovingVertex;
+  }
+
+  get isConnectingVertex() {
+    return this.cursor.isConnectingVertex;
+  }
+
+  get isDraggingVertex() {
+    return this.cursor.is(Store.Cursor.Type.VERTEX_MOVE);
+  }
 }
 
 export const store = proxy(new Store());
+
+function onWheel(ev: WheelEvent) {
+  store.canvas.onWheel(ev);
+  store.cursor.onWheel(ev, store);
+}
+
+function onPointerMove(ev: PointerEvent) {
+  store.cursor.onPointerMove(ev, store);
+  store.radial.onPointerMove(ev, store);
+  onVertexDragMove(ev);
+  onEdgeDragMove(ev);
+}
+
+function onPointerDown(ev: PointerEvent) {
+  store.radial.onPointerDown(ev, store);
+  store.cursor.onPointerDown(ev, store);
+}
+
+function onPointerUp(ev: PointerEvent) {
+  onEdgeDragUp(ev);
+  onVertexDragUp(ev);
+  store.cursor.onPointerUp(ev);
+}
+
+function onKeyUp(ev: KeyboardEvent) {
+  store.radial.onKeyUp(ev, store);
+}
 
 export function onMount<T extends Element>(elem: T | null) {
   if (!elem) return;
 
   store.isMounted = true;
 
-  const onWheel = (ev: WheelEvent) => {
-    store.canvas.onWheel(ev);
-  };
-
-  const onPointerMove = (ev: PointerEvent) => {
-    store.cursor.onPointerMove(ev, store);
-    store.radial.onPointerMove(ev, store);
-  };
-
-  const onPointerDown = (ev: PointerEvent) => {
-    store.matrix.onPointerDown(ev, store);
-    store.radial.onPointerDown(ev, store);
-  };
-
-  const onKeyUp = (ev: KeyboardEvent) => {
-    store.radial.onKeyUp(ev, store);
-  };
-
   window.addEventListener("wheel", onWheel);
   window.addEventListener("pointermove", onPointerMove);
   window.addEventListener("pointerdown", onPointerDown);
+  window.addEventListener("pointerup", onPointerUp);
   window.addEventListener("keyup", onKeyUp);
   store.canvas.onInit();
 
@@ -65,6 +93,7 @@ export function onMount<T extends Element>(elem: T | null) {
     window.removeEventListener("wheel", onWheel);
     window.removeEventListener("pointermove", onPointerMove);
     window.removeEventListener("pointerdown", onPointerDown);
+    window.removeEventListener("pointerup", onPointerUp);
     window.removeEventListener("keyup", onKeyUp);
     unsubscribe();
   };

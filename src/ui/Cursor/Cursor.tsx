@@ -9,6 +9,7 @@ import { CursorRemovePoint } from "./CursorRemovePoint";
 import { CursorConnectPoint } from "./CursorConnectPoint";
 import { CursorEdgeRemove } from "./CursorEdgeRemove";
 import { CursorVertexMove } from "./CursorVertexMove";
+import { CursorEdgeMove } from "./CursorEdgeMove";
 
 export function Cursor() {
   const {
@@ -51,6 +52,7 @@ export function Cursor() {
           {type === Store.Cursor.Type.CONNECT_POINT && <CursorConnectPoint />}
           {type === Store.Cursor.Type.REMOVE_EDGE && <CursorEdgeRemove />}
           {type === Store.Cursor.Type.VERTEX_MOVE && <CursorVertexMove />}
+          {type === Store.Cursor.Type.EDGE_MOVE && <CursorEdgeMove />}
         </motion.g>
       )}
     </AnimatePresence>

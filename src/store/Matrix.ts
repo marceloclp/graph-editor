@@ -2,249 +2,182 @@ import { MatrixEdge } from "./MatrixEdge";
 import { MatrixPoint } from "./MatrixPoint";
 import { Store } from "./Store";
 
+type Lookup<T> = Record<string, T>;
+type AdjMatrix = Record<string, Record<string, boolean>>;
+
 export class Matrix {
-  public readonly points: Record<string, MatrixPoint> = {};
-  public readonly edges: Record<string, MatrixEdge> = {};
+  public readonly edgesById: Lookup<MatrixEdge> = {};
+  public readonly verticesById: Lookup<MatrixPoint> = {};
+  private readonly verticesByPosId: Lookup<MatrixPoint> = {};
+  private readonly vertexIdToEdgeIds: AdjMatrix = {};
+  private readonly vertexIdToVertexId: AdjMatrix = {};
 
-  private readonly adjMatrix: Record<string, Record<string, boolean>> = {};
+  public connectingVertexId?: string;
+  public draggingVertexId?: string;
+  public draggingEdgeId?: string;
 
   /**
    *
    */
-  public selectedPoint?: MatrixPoint;
-
-  getPoint(x: number, y: number): MatrixPoint | undefined {
-    const id = MatrixPoint.createId(x, y);
-    return this.points[id];
+  getVertex(id: string) {
+    return this.verticesById[id];
   }
 
-  public findClosestMatrixPoint(x: number, y: number, threshold = 0) {
-    const closestGridPoint = Store.Canvas.findClosestGridPoint(x, y, threshold);
+  /**
+   *
+   */
+  createVertex(x: number, y: number): MatrixPoint | undefined {
+    // 1. Verify that a vertex doesn't exist at this point yet:
+    const posId = MatrixPoint.createPosId(x, y);
 
-    if (!closestGridPoint) {
+    if (posId in this.verticesByPosId) {
       return undefined;
     }
 
-    const id = MatrixPoint.createId(closestGridPoint.x, closestGridPoint.y);
-    return this.points[id];
-  }
+    // 2. Create the vertex:
+    const vertex = new MatrixPoint(x, y);
 
-  /**
-   * When creating a point, we need to:
-   *
-   * 1. Verify that it doesn't already exist
-   * 2. Add the point to the points map
-   * 3. Initialize the adjacency matrix entry for this point
-   */
-  createPoint(x: number, y: number): MatrixPoint | undefined {
-    const point = new MatrixPoint(x, y);
+    // 3. Add the vertex to the lookup tables:
+    this.verticesById[vertex.id] = vertex;
+    this.verticesByPosId[posId] = vertex;
 
-    if (point.id in this.points) {
-      return undefined;
-    }
-
-    // Add the point to the points map:
-    this.points[point.id] = point;
-
-    // Initialize the adjacency matrix for this point:
-    this.adjMatrix[point.id] ||= {};
-
-    return point;
-  }
-
-  /**
-   * When removing a point, we need to:
-   *
-   * 1. Remove all edges connecting to the point (recursively)
-   * 2. Remove the adjacency matrix for this point
-   * 3. Remove the point from the points map
-   */
-  removePoint(x: number, y: number): MatrixPoint | undefined {
-    const id = MatrixPoint.createId(x, y);
-    const point = this.points[id];
-
-    if (point) {
-      // First we delete all edges connected to this point:
-      const edges = this.adjMatrix[id] || {};
-      for (const edgeId in edges) {
-        this.removeEdge(edgeId);
-      }
-
-      // Then we delete the adjacency matrix entry:
-      delete this.adjMatrix[id];
-
-      // Finally delete the point:
-      delete this.points[id];
-    }
-
-    return point;
-  }
-
-  /**
-   * When removing a vertex, we need to:
-   *
-   * 1. Remove all edges connected to the vertex
-   * 2. Remove the adjacency matrix for this vertex
-   * 3. Remove the vertex from the vertex lookup
-   */
-  removeVertex(vertexId: string): MatrixPoint | undefined {
-    const vertex = this.points[vertexId];
-
-    if (!vertex) {
-      return undefined;
-    }
-
-    // Remove all edges connected to this vertex:
-    const edges = this.adjMatrix[vertexId];
-    for (const edgeId in edges) {
-      this.removeEdge(edgeId);
-    }
-
-    // Remove the adjacency matrix entry:
-    delete this.adjMatrix[vertexId];
-    // Remove the vertex from the vertex lookup:
-    delete this.points[vertexId];
+    // Initialize the adjacency matrixes for this vertex:
+    this.vertexIdToEdgeIds[vertex.id] = {};
+    this.vertexIdToVertexId[vertex.id] = {};
 
     return vertex;
   }
 
   /**
-   * When creating an edge, we need to:
    *
-   * 1. Verify that it doesn't exist already
-   * 2. Add the edge to the edges map
-   * 3. Connect the points to the edge in the adjacency matrix
    */
-  createEdge(p1: MatrixPoint, p2: MatrixPoint) {
-    const edge = new MatrixEdge(p1, p2);
+  removeVertex(vertexId: string): MatrixPoint | undefined {
+    // 1. Verify that the vertex exists:
+    const vertex = this.verticesById[vertexId];
 
-    if (this.edges[edge.id]) {
-      // Edge already exists, so we skip creating it:
+    if (!vertex) {
       return undefined;
     }
 
-    // Add the edge to the edges map:
-    this.edges[edge.id] = edge;
+    // 2. Remove the vertex from the lookup tables:
+    delete this.verticesById[vertex.id];
+    delete this.verticesByPosId[vertex.posId];
 
-    // Connect the points to the adjacency matrix:
-    this.adjMatrix[p1.id][edge.id] = true;
-    this.adjMatrix[p2.id][edge.id] = true;
+    // 3. Remove any edges connected to the vertex:
+    const edgeIds = Object.keys(this.vertexIdToEdgeIds[vertex.id]);
+    for (const edgeId of edgeIds) {
+      this.removeEdge(edgeId);
+    }
+
+    return vertex;
+  }
+
+  dragVertex(vertexId: string) {
+    const vertex = this.getVertex(vertexId);
+
+    if (!vertex) {
+      return;
+    }
+
+    const prevPosId = vertex.posId;
+
+    const { x, y } = Store.Canvas.findClosestGridPoint(
+      vertex.canvasX + vertex.dragX,
+      vertex.canvasY + vertex.dragY,
+      // We use a slightly larger threshold to ensure we always get a point:
+      Store.Canvas.Config.squareWidth + 10
+    )!;
+
+    vertex.canvasX = x;
+    vertex.canvasY = y;
+    vertex.dragX = 0;
+    vertex.dragY = 0;
+
+    if (prevPosId !== vertex.posId) {
+      delete this.verticesByPosId[prevPosId];
+      this.verticesByPosId[vertex.posId] = vertex;
+    }
+  }
+
+  /**
+   *
+   */
+  getEdge(id: string) {
+    return this.edgesById[id];
+  }
+
+  /**
+   *
+   */
+  createEdge(v1: MatrixPoint, v2: MatrixPoint): MatrixEdge | undefined {
+    // 1. Verify that we are not trying to connect the same vertex to itself:
+    if (v1.id === v2.id) {
+      return undefined;
+    }
+
+    // 2. Verify that an edge between those two points doesn't exist yet:
+    if (this.hasEdgeBetween(v1, v2)) {
+      return undefined;
+    }
+
+    // 3. Create the edge:
+    const edge = new MatrixEdge(v1.id, v2.id);
+
+    // 4. Add the edge to the lookup table:
+    this.edgesById[edge.id] = edge;
+
+    // 5. Connect the two vertices in the adjacency matrix:
+    this.vertexIdToVertexId[v1.id][v2.id] = true;
+    this.vertexIdToVertexId[v2.id][v1.id] = true;
+
+    // 6. Connect the vertices to the edge in the adjacency matrix:
+    this.vertexIdToEdgeIds[v1.id][edge.id] = true;
+    this.vertexIdToEdgeIds[v2.id][edge.id] = true;
 
     return edge;
   }
 
   /**
-   * When removing an edge, we need to:
    *
-   * 1. Verify the edge exists
-   * 2. Remove the edge from the adjacency matrix for its points
-   * 3. Remove the edge from the edges map
    */
   removeEdge(edgeId: string): MatrixEdge | undefined {
-    const edge = this.edges[edgeId];
+    // 1. Verify that the edge exists:
+    const edge = this.edgesById[edgeId];
 
     if (!edge) {
       return undefined;
     }
 
-    // Remove the edge from the adjacency matrix for its points:
-    delete this.adjMatrix[edge.p1.id][edgeId];
-    delete this.adjMatrix[edge.p2.id][edgeId];
+    // 2. Remove the edge from the lookup table:
+    delete this.edgesById[edge.id];
 
-    // Remove the edge from the edges map:
-    delete this.edges[edgeId];
+    // 3. Disconnect the edge vertices from each other in the adjacency matrix:
+    delete this.vertexIdToVertexId[edge.p1Id][edge.p2Id];
+    delete this.vertexIdToVertexId[edge.p2Id][edge.p1Id];
+
+    // 4. Disconnect the vertices from the edge in the adjacency matrix:
+    delete this.vertexIdToEdgeIds[edge.p1Id][edge.id];
+    delete this.vertexIdToEdgeIds[edge.p2Id][edge.id];
 
     return edge;
   }
 
-  onPointerDown(ev: PointerEvent, store: Store) {
-    if (ev.metaKey) return;
+  dragEdge(edgeId: string) {
+    const edge = this.getEdge(edgeId);
 
-    switch (store.cursor.type) {
-      case Store.Cursor.Type.ADD_POINT:
-        return this.onVertexCreate(ev, store);
-      case Store.Cursor.Type.REMOVE_POINT:
-        return this.onVertexRemove(ev, store);
-      case Store.Cursor.Type.CONNECT_POINT:
-        return this.onConnectPoint(ev, store);
-    }
-  }
-
-  /**
-   *
-   */
-  private onVertexCreate(ev: PointerEvent, store: Store) {
-    const gridX = store.cursor.canvasX;
-    const gridY = store.cursor.canvasY;
-
-    const point = Store.Canvas.findClosestGridPoint(gridX, gridY, 10);
-
-    if (!point) {
-      // Assume the user wants to cancel the operation if clicking outside
-      // of a valid grid point target:
-      return store.cursor.setType(undefined);
-    }
-
-    this.createPoint(point.x, point.y);
-  }
-
-  /**
-   *
-   */
-  private onVertexRemove(ev: PointerEvent, store: Store) {
-    const gridX = store.cursor.canvasX;
-    const gridY = store.cursor.canvasY;
-
-    const point = this.findClosestMatrixPoint(gridX, gridY, 10);
-
-    if (!point) {
-      // Assume the user wants to cancel the operation if clicking outside
-      // of a valid grid point target:
-      return store.cursor.setType(undefined);
-    }
-
-    this.removeVertex(point.id);
-  }
-
-  /**
-   * When connecting points to form an edge, we have three states:
-   *
-   * 1. No origin point selected yet
-   * 2. An origin point is selected, and we are selecting the end point
-   * 3. Both points are selected, so we create the edge.
-   *
-   * NOTE: If the user clicks outside of a valid matrix point, we assume
-   * that the intent is to cancel the operation!
-   */
-  private onConnectPoint(ev: PointerEvent, store: Store) {
-    const gridX = store.cursor.canvasX;
-    const gridY = store.cursor.canvasY;
-
-    const point = this.findClosestMatrixPoint(gridX, gridY, 10);
-
-    if (!point) {
-      // No point was clicked, we assume the user wants to cancel
-      // the operation. First we reset the state:
-      this.selectedPoint = undefined;
-      store.cursor.setType(undefined);
+    if (!edge) {
       return;
     }
 
-    if (!this.selectedPoint) {
-      // No origin point is selected yet, so select the clicked point:
-      this.selectedPoint = point;
-    } else if (this.selectedPoint) {
-      // An origin point is already selected, so we can create an edge
-      // between the origin and the clicked point:
-      this.createEdge(this.selectedPoint, point);
+    this.dragVertex(edge.p1Id);
+    this.dragVertex(edge.p2Id);
+  }
 
-      // We then switch the origin point to be the clicked point so
-      // the operation can continue:
-      this.selectedPoint = point;
-    }
+  private hasEdgeBetween(v1: MatrixPoint, v2: MatrixPoint) {
+    return this.vertexIdToVertexId[v1.id][v2.id];
   }
 
   public resetInteractive() {
-    this.selectedPoint = undefined;
+    this.connectingVertexId = undefined;
   }
 }

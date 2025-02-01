@@ -1,9 +1,7 @@
 import { clamp } from "~/utils/lamp";
 
 export class Canvas {
-  /** */
   public panX: number = 0;
-  /**  */
   public panY: number = 0;
 
   public scrollX: number = 0;
@@ -41,6 +39,10 @@ export class Canvas {
 
     this.scrollX = Math.abs(this.panX) / totalRangeX;
     this.scrollY = Math.abs(this.panY) / totalRangeY;
+  }
+
+  findClosestGridPoint(x: number, y: number, threshold: number = 0) {
+    return Canvas.findClosestGridPoint(x, y, threshold);
   }
 
   /**

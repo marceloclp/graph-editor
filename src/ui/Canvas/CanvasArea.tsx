@@ -6,28 +6,28 @@ import { Edge } from "../Edge/Edge";
 
 export function CanvasArea() {
   const {
-    matrix: { points, edges },
+    matrix: { edgesById, verticesById },
   } = useSnapshot(store);
 
   return (
     <AnimatePresence>
-      {Object.values(edges).map((edge) => (
+      {Object.values(edgesById).map((edge) => (
         <Edge
           key={edge.id}
           id={edge.id}
-          x1={edge.p1.canvasX}
-          y1={edge.p1.canvasY}
-          x2={edge.p2.canvasX}
-          y2={edge.p2.canvasY}
+          x1={verticesById[edge.p1Id].canvasX + verticesById[edge.p1Id].dragX}
+          y1={verticesById[edge.p1Id].canvasY + verticesById[edge.p1Id].dragY}
+          x2={verticesById[edge.p2Id].canvasX + verticesById[edge.p2Id].dragX}
+          y2={verticesById[edge.p2Id].canvasY + verticesById[edge.p2Id].dragY}
         />
       ))}
 
-      {Object.values(points).map((point) => (
+      {Object.values(verticesById).map((point) => (
         <Vertex
           key={point.id}
           id={point.id}
-          x={point.canvasX}
-          y={point.canvasY}
+          x={point.canvasX + point.dragX}
+          y={point.canvasY + point.dragY}
         />
       ))}
     </AnimatePresence>
