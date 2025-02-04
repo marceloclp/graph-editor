@@ -1,9 +1,9 @@
 import { useMotionValue, motion, AnimatePresence } from "motion/react";
-import { useEffect } from "react";
+import { Fragment, useEffect, useState } from "react";
 import { twMerge } from "tailwind-merge";
 import { useSnapshot } from "valtio/react";
 import { watch } from "valtio/utils";
-import { store } from "~/store/Store";
+import { Store, store } from "~/store/Store";
 import { match } from "ts-pattern";
 import { CursorType } from "~/store/Cursor";
 import { PathMinus } from "../SVG/PathMinus";
@@ -31,36 +31,78 @@ export function Cursor() {
   }, [x, y]);
 
   return (
+    <Fragment>
+      <AnimatePresence>
+        {isMounted && (
+          <motion.g
+            data-cursor
+            style={{ x, y }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="pointer-events-none"
+          >
+            <motion.circle
+              r={16}
+              cx={0}
+              cy={0}
+              className={twMerge(
+                "fill-neutral-300/60",
+                "group-has-data-[impossible=true]/app:fill-red-300/60",
+                isRadialActive && "fill-blue-300/60"
+              )}
+            />
+            {!isRadialActive &&
+              match(type)
+                .with(CursorType.VERTEX_ADD, () => <VertexAddIcon />)
+                .with(CursorType.VERTEX_REMOVE, () => <VertexRemoveIcon />)
+                .with(CursorType.VERTEX_MOVE, () => <VertexMoveIcon />)
+                .with(CursorType.EDGE_ADD, () => <EdgeAddIcon />)
+                .with(CursorType.EDGE_REMOVE, () => <EdgeRemoveIcon />)
+                .with(CursorType.EDGE_MOVE, () => <EdgeMoveIcon />)
+                .otherwise(() => null)}
+          </motion.g>
+        )}
+      </AnimatePresence>
+      <ClosestGridPoint />
+    </Fragment>
+  );
+}
+
+function ClosestGridPoint() {
+  const [point, setPoint] = useState<{ x: number; y: number }>();
+
+  useEffect(() => {
+    return watch((get) => {
+      const cursorType = get(store).cursor.type;
+      const canvasX = get(store).cursor.canvasX;
+      const canvasY = get(store).cursor.canvasY;
+
+      if (cursorType !== CursorType.VERTEX_ADD) {
+        return setPoint(undefined);
+      }
+
+      const point = Store.Canvas.findClosestGridPoint(canvasX, canvasY, 10);
+      if (point && !store.matrix.getVertexAt(point.x, point.y)) {
+        return setPoint(point);
+      }
+
+      setPoint(undefined);
+    });
+  }, []);
+
+  return (
     <AnimatePresence>
-      {isMounted && (
-        <motion.g
-          data-cursor
-          style={{ x, y }}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          className="pointer-events-none"
-        >
-          <motion.circle
-            r={16}
-            cx={0}
-            cy={0}
-            className={twMerge(
-              "fill-neutral-300/60",
-              "group-has-data-[impossible=true]/app:fill-red-300/60",
-              isRadialActive && "fill-blue-300/60"
-            )}
-          />
-          {!isRadialActive &&
-            match(type)
-              .with(CursorType.VERTEX_ADD, () => <VertexAddIcon />)
-              .with(CursorType.VERTEX_REMOVE, () => <VertexRemoveIcon />)
-              .with(CursorType.VERTEX_MOVE, () => <VertexMoveIcon />)
-              .with(CursorType.EDGE_ADD, () => <EdgeAddIcon />)
-              .with(CursorType.EDGE_REMOVE, () => <EdgeRemoveIcon />)
-              .with(CursorType.EDGE_MOVE, () => <EdgeMoveIcon />)
-              .otherwise(() => null)}
-        </motion.g>
+      {point && (
+        <motion.circle
+          cx={point.x}
+          cy={point.y}
+          r={10}
+          initial={{ scale: 0, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          exit={{ scale: 0, opacity: 0 }}
+          className="stroke-4 fill-white stroke-neutral-300"
+        />
       )}
     </AnimatePresence>
   );

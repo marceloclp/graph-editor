@@ -11,12 +11,6 @@ enum Variant {
   DISABLED = "DISABLED",
   IMPOSSIBLE = "IMPOSSIBLE",
 
-  // /**
-  //  * When adding a new vertex, clicking on top of an existing vertex
-  //  * should not be allowed.
-  //  */
-  // ADD_HOVERING = "ADD_HOVERING",
-
   REMOVE_HOVERING = "REMOVE_HOVERING",
 
   CONNECT_HOVER_START = "CONNECT_HOVER_START",

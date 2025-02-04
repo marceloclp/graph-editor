@@ -25,6 +25,10 @@ export class Matrix {
     return this.verticesById[id];
   }
 
+  getVertexAt(x: number, y: number) {
+    return this.verticesByPosId[MatrixPoint.createPosId(x, y)];
+  }
+
   /**
    *
    */
