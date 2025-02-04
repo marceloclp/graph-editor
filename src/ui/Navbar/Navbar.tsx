@@ -17,7 +17,6 @@ export function Navbar() {
         "absolute",
         "pointer-events-none",
         "top-0 left-0",
-        // "h-screen",
         "w-screen",
         "p-4",
         "flex items-center justify-center gap-2"
@@ -39,7 +38,7 @@ export function Navbar() {
               "border-neutral-300",
               "rounded-full",
 
-              "text-xs",
+              "text-sm",
               "text-neutral-400",
               "font-mono",
               "font-semibold",

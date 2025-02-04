@@ -41,16 +41,27 @@ const RadialConfig = {
   coneEnlargeOrigin: 16,
 
   /** Cached square positions. */
-  squarePositions: [] as { x: number; y: number }[],
+  squarePositions: [] as { x: number; y: number; angle: number }[],
+
+  actions: [
+    { name: "Add vertex" },
+    { name: "Remove vertex" },
+    { name: "Move vertex" },
+    { name: "Add edge" },
+    { name: "Remove edge" },
+    { name: "Move edge" },
+  ],
 };
 
 RadialConfig.squarePositions = range(RadialConfig.n, (i) => {
   const r = RadialConfig.outerRadius;
   const mid = RadialConfig.squareMid;
   const angle = Math.PI / 2 - (2 * Math.PI * i) / RadialConfig.n;
+
   return {
     x: r * Math.cos(angle) - mid,
     y: -r * Math.sin(angle) - mid,
+    angle: angle,
   };
 });
 
