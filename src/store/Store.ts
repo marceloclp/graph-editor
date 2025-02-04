@@ -25,52 +25,6 @@ export class Store {
     const canvasY = y - this.canvas.panY;
     return { x: canvasX, y: canvasY };
   }
-
-  get isAddingVertex() {
-    return this.cursor.isAddingVertex;
-  }
-
-  get isRemovingVertex() {
-    return this.cursor.isRemovingVertex;
-  }
-
-  get isConnectingVertex() {
-    return this.cursor.isConnectingVertex;
-  }
-
-  get isDraggingVertex() {
-    return this.cursor.is(Store.Cursor.Type.VERTEX_MOVE);
-  }
-
-  onType(handlers: {
-    onVertexAdd?: () => void;
-    onVertexRemove?: () => void;
-    onVertexMove?: () => void;
-    onEdgeAddStart?: () => void;
-    onEdgeAddEnd?: () => void;
-    onEdgeRemove?: () => void;
-    onEdgeMove?: () => void;
-  }) {
-    const Type = Store.Cursor.Type;
-    const type = this.cursor.type;
-    if (type === Type.VERTEX_ADD) {
-      handlers.onVertexAdd?.();
-    } else if (type === Type.VERTEX_REMOVE) {
-      handlers.onVertexRemove?.();
-    } else if (type === Type.VERTEX_MOVE) {
-      handlers.onVertexMove?.();
-    } else if (type === Type.EDGE_ADD) {
-      if (!this.matrix.connectingVertexId) {
-        handlers.onEdgeAddStart?.();
-      } else if (this.matrix.connectingVertexId) {
-        handlers.onEdgeAddEnd?.();
-      }
-    } else if (type === Type.EDGE_REMOVE) {
-      handlers.onEdgeRemove?.();
-    } else if (type === Type.EDGE_MOVE) {
-      handlers.onEdgeMove?.();
-    }
-  }
 }
 
 export const store = proxy(new Store());
@@ -98,9 +52,18 @@ function onPointerUp(ev: PointerEvent) {
   store.cursor.onPointerUp(ev);
 }
 
+function onPointerLeave(ev: PointerEvent) {
+  store.cursor.onPointerUp(ev);
+}
+
 function onKeyUp(ev: KeyboardEvent) {
   store.radial.onKeyUp(ev, store);
   store.cursor.onKeyUp(ev);
+}
+
+function onResize(ev: UIEvent) {
+  store.canvas.onResize(ev);
+  store.cursor.onResize(ev, store);
 }
 
 export function onMount<T extends Element>(elem: T | null) {
@@ -112,7 +75,10 @@ export function onMount<T extends Element>(elem: T | null) {
   window.addEventListener("pointermove", onPointerMove);
   window.addEventListener("pointerdown", onPointerDown);
   window.addEventListener("pointerup", onPointerUp);
+  window.addEventListener("pointerleave", onPointerLeave);
+  window.addEventListener("pointercancel", onPointerLeave);
   window.addEventListener("keyup", onKeyUp);
+  window.addEventListener("resize", onResize);
   store.canvas.onInit();
 
   const unsubscribe = subscribeKey(store.cursor, "type", () => {
@@ -125,7 +91,10 @@ export function onMount<T extends Element>(elem: T | null) {
     window.removeEventListener("pointermove", onPointerMove);
     window.removeEventListener("pointerdown", onPointerDown);
     window.removeEventListener("pointerup", onPointerUp);
+    window.removeEventListener("pointerleave", onPointerLeave);
+    window.removeEventListener("pointercancel", onPointerLeave);
     window.removeEventListener("keyup", onKeyUp);
+    window.removeEventListener("resize", onResize);
     unsubscribe();
   };
 }

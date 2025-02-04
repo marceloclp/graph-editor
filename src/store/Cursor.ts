@@ -61,6 +61,12 @@ export class Cursor {
     this.canvasY = ev.clientY - store.canvas.panY;
   }
 
+  onResize(ev: UIEvent, store: Store) {
+    // Maintain cursor position relative to canvas after resize
+    this.canvasX = this.screenX - store.canvas.panX;
+    this.canvasY = this.screenY - store.canvas.panY;
+  }
+
   /**
    * Keep track of the cursor position on pointer move.
    */
@@ -93,6 +99,7 @@ export class Cursor {
     }
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   onPointerUp(ev: PointerEvent) {
     this.isDragging = false;
     this.dragX = 0;
@@ -100,9 +107,7 @@ export class Cursor {
   }
 
   onKeyUp(ev: KeyboardEvent) {
-    if (ev.key === "Escape") {
-      this.setType();
-    }
+    if (ev.key === "Escape") this.setType();
   }
 
   is(type?: CursorType) {

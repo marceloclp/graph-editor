@@ -41,6 +41,23 @@ export class Canvas {
     this.scrollY = Math.abs(this.panY) / totalRangeY;
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  onResize(ev: UIEvent) {
+    const screenWidth = window.innerWidth;
+    const screenHeight = window.innerHeight;
+
+    // Calculate new pan positions while maintaining relative scroll position
+    const totalRangeX = Canvas.Config.canvasWidth - screenWidth;
+    const totalRangeY = Canvas.Config.canvasHeight - screenHeight;
+
+    this.panX = -this.scrollX * totalRangeX;
+    this.panY = -this.scrollY * totalRangeY;
+
+    // Ensure pan values stay within bounds
+    this.panX = clamp(this.panX, -Canvas.Config.canvasWidth + screenWidth, 0);
+    this.panY = clamp(this.panY, -Canvas.Config.canvasHeight + screenHeight, 0);
+  }
+
   findClosestGridPoint(x: number, y: number, threshold: number = 0) {
     return Canvas.findClosestGridPoint(x, y, threshold);
   }
