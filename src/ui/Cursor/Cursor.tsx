@@ -10,6 +10,7 @@ import { PathMinus } from "../SVG/PathMinus";
 import { PathArrow } from "../SVG/PathArrow";
 import { PathPlus } from "../SVG/PathPlus";
 import { Circle } from "../SVG/Circle";
+import { range } from "~/utils/range";
 
 export function Cursor() {
   const {
@@ -70,39 +71,94 @@ export function Cursor() {
 }
 
 function ClosestGridPoint() {
-  const [point, setPoint] = useState<{ x: number; y: number }>();
+  const [origin, setOrigin] = useState<{
+    x: number;
+    y: number;
+    isHovered?: boolean;
+  }>();
 
   useEffect(() => {
     return watch((get) => {
+      const isRadialActive = get(store).radial.isActive;
       const cursorType = get(store).cursor.type;
       const canvasX = get(store).cursor.canvasX;
       const canvasY = get(store).cursor.canvasY;
 
-      if (cursorType !== CursorType.VERTEX_ADD) {
-        return setPoint(undefined);
+      if (cursorType !== CursorType.VERTEX_ADD || isRadialActive) {
+        return setOrigin(undefined);
       }
+
+      const origin = Store.Canvas.findClosestGridPoint(
+        canvasX,
+        canvasY,
+        // We use the full square width as the threshold to ensure we always get an origin:
+        Store.Canvas.Config.squareWidth
+      )!;
 
       const point = Store.Canvas.findClosestGridPoint(canvasX, canvasY, 10);
-      if (point && !store.matrix.getVertexAt(point.x, point.y)) {
-        return setPoint(point);
-      }
 
-      setPoint(undefined);
+      setOrigin({
+        x: origin.x,
+        y: origin.y,
+        isHovered: !!point,
+      });
     });
   }, []);
 
+  const w = Store.Canvas.Config.squareWidth;
+
   return (
     <AnimatePresence>
-      {point && (
-        <motion.circle
-          cx={point.x}
-          cy={point.y}
-          r={10}
+      {origin && (
+        <motion.g
           initial={{ scale: 0, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           exit={{ scale: 0, opacity: 0 }}
-          className="stroke-4 fill-white stroke-neutral-300"
-        />
+        >
+          {range(5, (i) => i)
+            .flatMap((row) =>
+              range(5, (col) => ({
+                x: origin.x + (col - 2) * w,
+                y: origin.y + (row - 2) * w,
+                distance: Math.sqrt(
+                  Math.pow(col - 2, 2) + Math.pow(row - 2, 2)
+                ),
+              }))
+            )
+            .filter(({ distance }) => distance > 0 && distance <= 2)
+            .map(({ x, y, distance }) => (
+              <motion.circle
+                key={`${x},${y}`}
+                cx={x}
+                cy={y}
+                r={8}
+                className=" fill-neutral-200"
+                initial={{ opacity: 0, scale: 0 }}
+                animate={{
+                  opacity: 0.8,
+                  scale: Math.max(0, 1 - distance * 0.175),
+                }}
+                exit={{ opacity: 0, scale: 0 }}
+                transition={{ type: "spring", duration: 0.175 }}
+              />
+            ))}
+          <motion.circle
+            key={`${origin.x},${origin.y}`}
+            cx={origin.x}
+            cy={origin.y}
+            r={8}
+            initial={{ opacity: 0, scale: 0, fill: "var(--color-neutral-200)" }}
+            animate={{
+              opacity: 0.8,
+              scale: origin.isHovered ? 1.5 : 1,
+              fill: origin.isHovered
+                ? "var(--color-blue-400)"
+                : "var(--color-neutral-200)",
+            }}
+            exit={{ opacity: 0, scale: 0, fill: "var(--color-neutral-200)" }}
+            transition={{ type: "spring", duration: 0.175 }}
+          />
+        </motion.g>
       )}
     </AnimatePresence>
   );
