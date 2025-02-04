@@ -1,5 +1,5 @@
 import { useMotionValue } from "motion/react";
-import { useEffect } from "react";
+import { Fragment, useEffect } from "react";
 import { twMerge } from "tailwind-merge";
 import { store } from "~/store/Store";
 import { motion } from "framer-motion";
@@ -17,39 +17,36 @@ export function Scrollbar() {
   }, [scrollX, scrollY]);
 
   return (
-    <div
-      className={twMerge(
-        "absolute",
-        "pointer-events-none",
-        "top-0 left-0",
-        "h-screen",
-        "w-screen"
-      )}
-    >
+    <Fragment>
       <motion.div
         style={{ y: scrollY }}
         className={twMerge(
           "absolute",
-          "w-3",
-          "top-2",
-          "right-2",
-          "h-[calc(100vh-200px-1rem)]"
+          "pointer-events-none",
+          "top-0 bottom-96 right-0",
+          "w-4",
+          "flex flex-col"
         )}
       >
-        <motion.div className="h-[200px] bg-neutral-400/25 rounded-full w-3" />
+        <div className="h-96 w-full pt-2 pb-4 px-1">
+          <div className="h-full w-full bg-neutral-400/25 rounded-full" />
+        </div>
       </motion.div>
+
       <motion.div
         style={{ x: scrollX }}
         className={twMerge(
           "absolute",
-          "h-3",
-          "bottom-2",
-          "left-2",
-          "w-[calc(100vw-200px-1rem)]"
+          "pointer-events-none",
+          "bottom-0 left-0 right-96",
+          "h-4",
+          "flex flex-col"
         )}
       >
-        <motion.div className="w-[200px] bg-neutral-400/25 rounded-full h-3" />
+        <div className="w-96 h-full py-1 pl-2 pr-4">
+          <div className="h-full w-full bg-neutral-400/25 rounded-full" />
+        </div>
       </motion.div>
-    </div>
+    </Fragment>
   );
 }

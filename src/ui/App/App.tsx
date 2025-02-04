@@ -27,7 +27,9 @@ export function App() {
         "bg-white",
 
         // Disable overscroll so we can pan using 2-fingers gesture:
-        "overscroll-none"
+        "overscroll-none",
+
+        "cursor-none"
       )}
     >
       <Canvas>

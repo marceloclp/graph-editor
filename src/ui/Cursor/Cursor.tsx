@@ -12,7 +12,8 @@ import { PathArrow } from "../GIcons/PathArrow";
 
 export function Cursor() {
   const {
-    cursor: { isActive, type },
+    isMounted,
+    cursor: { type },
     radial: { isActive: isRadialActive },
   } = useSnapshot(store);
 
@@ -30,7 +31,7 @@ export function Cursor() {
 
   return (
     <AnimatePresence>
-      {isActive && (
+      {isMounted && (
         <motion.g
           data-cursor
           style={{ x, y }}
