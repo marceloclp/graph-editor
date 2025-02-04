@@ -46,9 +46,9 @@ export function Edge({
       const isDragging = draggingId === edge.id;
 
       const disableTypes = [
-        Store.Cursor.Type.ADD_POINT,
-        Store.Cursor.Type.CONNECT_POINT,
-        Store.Cursor.Type.REMOVE_POINT,
+        Store.Cursor.Type.VERTEX_ADD,
+        Store.Cursor.Type.EDGE_ADD,
+        Store.Cursor.Type.VERTEX_REMOVE,
         Store.Cursor.Type.VERTEX_MOVE,
       ];
 
@@ -62,7 +62,7 @@ export function Edge({
       }
 
       //
-      else if (type === Store.Cursor.Type.REMOVE_EDGE) {
+      else if (type === Store.Cursor.Type.EDGE_REMOVE) {
         if (isHovering) return setVariant(Variant.REMOVE_HOVERING);
       }
 
@@ -155,7 +155,7 @@ function onEdgeTap(ev: TapEvent) {
   const edgeId = getEdgeIdFromEvent(ev);
 
   // Handle tapping to remove the edge:
-  if (store.cursor.is(CursorType.REMOVE_EDGE)) {
+  if (store.cursor.is(CursorType.EDGE_REMOVE)) {
     store.matrix.removeEdge(edgeId);
   }
 }

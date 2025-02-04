@@ -1,13 +1,13 @@
 import { Store } from "./Store";
 
 export enum CursorType {
-  ADD_POINT = "ADD_POINT",
-  REMOVE_POINT = "REMOVE_POINT",
-  CONNECT_POINT = "CONNECT_POINT",
-  REMOVE_EDGE = "REMOVE_EDGE",
-  INFO = "INFO",
+  VERTEX_ADD = "VERTEX_ADD",
+  VERTEX_REMOVE = "VERTEX_REMOVE",
   VERTEX_MOVE = "VERTEX_MOVE",
+  EDGE_ADD = "EDGE_ADD",
+  EDGE_REMOVE = "EDGE_REMOVE",
   EDGE_MOVE = "EDGE_MOVE",
+  INFO = "INFO",
 }
 
 export class Cursor {
@@ -32,15 +32,15 @@ export class Cursor {
   }
 
   get isAddingVertex() {
-    return this.type === CursorType.ADD_POINT;
+    return this.type === CursorType.VERTEX_ADD;
   }
 
   get isRemovingVertex() {
-    return this.type === CursorType.REMOVE_POINT;
+    return this.type === CursorType.VERTEX_REMOVE;
   }
 
   get isConnectingVertex() {
-    return this.type === CursorType.CONNECT_POINT;
+    return this.type === CursorType.EDGE_ADD;
   }
 
   public getClosestGridPoint(threshold: number = 10) {
@@ -85,7 +85,7 @@ export class Cursor {
     this.dragX = 0;
     this.dragY = 0;
 
-    if (this.is(Cursor.Type.ADD_POINT) && !ev.metaKey) {
+    if (this.is(Cursor.Type.VERTEX_ADD) && !ev.metaKey) {
       const point = this.getClosestGridPoint();
       if (point) {
         store.matrix.createVertex(point.x, point.y);
@@ -108,13 +108,13 @@ export class Cursor {
       this.type = undefined;
     } else {
       this.type = [
-        CursorType.ADD_POINT,
-        CursorType.REMOVE_POINT,
-        CursorType.CONNECT_POINT,
-        CursorType.REMOVE_EDGE,
-        CursorType.INFO,
-        CursorType.EDGE_MOVE,
+        CursorType.VERTEX_ADD,
+        CursorType.VERTEX_REMOVE,
         CursorType.VERTEX_MOVE,
+        CursorType.EDGE_ADD,
+        CursorType.EDGE_REMOVE,
+        CursorType.EDGE_MOVE,
+        CursorType.INFO,
       ][index];
     }
   }

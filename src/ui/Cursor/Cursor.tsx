@@ -48,11 +48,11 @@ export function Cursor() {
             )}
           />
           {match(type)
-            .with(CursorType.ADD_POINT, () => <VertexAddIcon />)
-            .with(CursorType.REMOVE_POINT, () => <VertexRemoveIcon />)
+            .with(CursorType.VERTEX_ADD, () => <VertexAddIcon />)
+            .with(CursorType.VERTEX_REMOVE, () => <VertexRemoveIcon />)
             .with(CursorType.VERTEX_MOVE, () => <VertexMoveIcon />)
-            .with(CursorType.CONNECT_POINT, () => <EdgeAddIcon />)
-            .with(CursorType.REMOVE_EDGE, () => <EdgeRemoveIcon />)
+            .with(CursorType.EDGE_ADD, () => <EdgeAddIcon />)
+            .with(CursorType.EDGE_REMOVE, () => <EdgeRemoveIcon />)
             .with(CursorType.EDGE_MOVE, () => <EdgeMoveIcon />)
             .otherwise(() => null)}
         </motion.g>

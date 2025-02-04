@@ -1,6 +1,6 @@
 import { ComponentProps } from "react";
 
-export function BendToolAddIcon(props: ComponentProps<"svg">) {
+export function EdgeRemoveIcon(props: ComponentProps<"svg">) {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
@@ -35,7 +35,7 @@ export function BendToolAddIcon(props: ComponentProps<"svg">) {
       />
       <path
         transform="translate(4, 4)"
-        d="M12 8V16M16 12L8 12"
+        d="M16 12L8 12"
         stroke="currentColor"
         strokeWidth="2.5"
         strokeLinecap="round"

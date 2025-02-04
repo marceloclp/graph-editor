@@ -69,6 +69,7 @@ export function RadialSquare({
             className={twMerge(
               "stroke-[2.5]",
               isActive ? "text-blue-400" : "text-neutral-300",
+              "bg-red-500",
               "transition-all"
             )}
           />

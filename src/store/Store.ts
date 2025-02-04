@@ -53,19 +53,19 @@ export class Store {
   }) {
     const Type = Store.Cursor.Type;
     const type = this.cursor.type;
-    if (type === Type.ADD_POINT) {
+    if (type === Type.VERTEX_ADD) {
       handlers.onVertexAdd?.();
-    } else if (type === Type.REMOVE_POINT) {
+    } else if (type === Type.VERTEX_REMOVE) {
       handlers.onVertexRemove?.();
     } else if (type === Type.VERTEX_MOVE) {
       handlers.onVertexMove?.();
-    } else if (type === Type.CONNECT_POINT) {
+    } else if (type === Type.EDGE_ADD) {
       if (!this.matrix.connectingVertexId) {
         handlers.onEdgeAddStart?.();
       } else if (this.matrix.connectingVertexId) {
         handlers.onEdgeAddEnd?.();
       }
-    } else if (type === Type.REMOVE_EDGE) {
+    } else if (type === Type.EDGE_REMOVE) {
       handlers.onEdgeRemove?.();
     } else if (type === Type.EDGE_MOVE) {
       handlers.onEdgeMove?.();

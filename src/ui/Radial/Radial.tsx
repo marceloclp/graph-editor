@@ -3,12 +3,11 @@ import { useSnapshot } from "valtio/react";
 import { Store, store } from "~/store/Store";
 import { RadialCone } from "./RadialCone";
 import { RadialSquare } from "./RadialSquare";
-import { AddCircleHalfDotIcon } from "../Icons/AddCircleHalfDotIcon";
-import { RemoveCircleHalfDotIcon } from "../Icons/RemoveCircleHalfDotIcon";
-import { BendToolAddIcon } from "../Icons/BendToolAddIcon";
-import { BendToolRemoveIcon } from "../Icons/BendToolRemoveIcon";
-import { InfoIcon } from "../Icons/InfoIcon";
-import { VertexIconMove } from "../Icons/VertexMoveIcon";
+import { VertexAddIcon } from "../Icons/VertexAddIcon";
+import { VertexRemoveIcon } from "../Icons/VertexRemoveIcon";
+import { EdgeAddIcon } from "../Icons/EdgeAddIcon";
+import { EdgeRemoveIcon } from "../Icons/EdgeRemoveIcon";
+import { VertexMoveIcon } from "../Icons/VertexMoveIcon";
 import { EdgeMoveIcon } from "../Icons/EdgeMoveIcon";
 
 const {
@@ -38,16 +37,16 @@ export function Radial() {
           />
 
           <RadialCone />
-
-          <RadialSquare index={0} Icon={AddCircleHalfDotIcon} />
-          <RadialSquare index={1} Icon={RemoveCircleHalfDotIcon} />
-          <RadialSquare index={2} Icon={BendToolAddIcon} />
-          <RadialSquare index={3} Icon={BendToolRemoveIcon} />
-          <RadialSquare index={4} Icon={InfoIcon} />
-
-          <RadialSquare index={5} Icon={EdgeMoveIcon} />
-
-          <RadialSquare index={6} Icon={VertexIconMove} />
+          {[
+            VertexAddIcon,
+            VertexRemoveIcon,
+            VertexMoveIcon,
+            EdgeAddIcon,
+            EdgeRemoveIcon,
+            EdgeMoveIcon,
+          ].map((Icon, index) => (
+            <RadialSquare key={index} index={index} Icon={Icon} />
+          ))}
 
           {/* Inner circle - must stay above all other elements. */}
           <motion.circle

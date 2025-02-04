@@ -46,7 +46,7 @@ export function Vertex({ id, x, y }: { id: string; x: number; y: number }) {
       const isConnecting = connectingId === vertex.id;
       const isDragging = draggingId === vertex.id;
 
-      if (type === Store.Cursor.Type.CONNECT_POINT) {
+      if (type === Store.Cursor.Type.EDGE_ADD) {
         if (isHovering && !connectingId) {
           return setVariant(Variant.CONNECT_HOVER_START);
         } else if (isConnecting) {
@@ -59,14 +59,14 @@ export function Vertex({ id, x, y }: { id: string; x: number; y: number }) {
       }
 
       //
-      else if (type === Store.Cursor.Type.REMOVE_POINT) {
+      else if (type === Store.Cursor.Type.VERTEX_REMOVE) {
         if (isHovering) return setVariant(Variant.REMOVE_HOVERING);
       }
 
       //
       else if (type === Store.Cursor.Type.EDGE_MOVE) {
         return setVariant(Variant.DISABLED);
-      } else if (type === Store.Cursor.Type.REMOVE_EDGE) {
+      } else if (type === Store.Cursor.Type.EDGE_REMOVE) {
         return setVariant(Variant.DISABLED);
       }
 
@@ -80,7 +80,7 @@ export function Vertex({ id, x, y }: { id: string; x: number; y: number }) {
       }
 
       //
-      else if (type === CursorType.ADD_POINT && isHovering) {
+      else if (type === CursorType.VERTEX_ADD && isHovering) {
         return setVariant(Variant.IMPOSSIBLE);
       }
 
@@ -186,12 +186,12 @@ function onVertexTap(ev: TapEvent) {
   const vertexId = getVertexIdFromEvent(ev);
 
   // Handle tapping to remove the vertex:
-  if (store.cursor.is(CursorType.REMOVE_POINT)) {
+  if (store.cursor.is(CursorType.VERTEX_REMOVE)) {
     store.matrix.removeVertex(vertexId);
   }
 
   // Handle tapping to connect two vertices:
-  else if (store.cursor.is(CursorType.CONNECT_POINT)) {
+  else if (store.cursor.is(CursorType.EDGE_ADD)) {
     const originId = store.matrix.connectingVertexId;
     if (!originId) {
       // We are selecting the origin (first) vertex:
