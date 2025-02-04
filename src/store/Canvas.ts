@@ -1,6 +1,23 @@
 import { clamp } from "~/utils/clamp";
 
+const CanvasConfig = {
+  canvasWidth: 4000,
+  canvasHeight: 4000,
+  squareWidth: 50,
+  squareHeight: 50,
+
+  get xAxisY() {
+    return this.canvasHeight / 2;
+  },
+
+  get yAxisX() {
+    return this.canvasWidth / 2;
+  },
+};
+
 export class Canvas {
+  public static readonly Config = CanvasConfig;
+
   public panX: number = 0;
   public panY: number = 0;
 
@@ -82,19 +99,4 @@ export class Canvas {
 
     return distance <= threshold ? { x: pX, y: pY } : undefined;
   }
-
-  public static readonly Config = {
-    canvasWidth: 4000,
-    canvasHeight: 4000,
-    squareWidth: 50,
-    squareHeight: 50,
-
-    get xAxisY() {
-      return this.canvasHeight / 2;
-    },
-
-    get yAxisX() {
-      return this.canvasWidth / 2;
-    },
-  };
 }

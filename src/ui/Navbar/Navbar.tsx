@@ -63,7 +63,6 @@ export function Navbar() {
                       [CursorType.EDGE_ADD]: "Action: Add Edge",
                       [CursorType.EDGE_REMOVE]: "Action: Remove Edge",
                       [CursorType.EDGE_MOVE]: "Action: Move Edge",
-                      [CursorType.INFO]: "Action: Info",
                     }[cursorType]
                   : "Action: None"
               }

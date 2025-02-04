@@ -7,7 +7,6 @@ import { onMount } from "~/store/Store";
 import { Radial } from "../Radial/Radial";
 import { Cursor } from "../Cursor/Cursor";
 import { CanvasArea } from "../Canvas/CanvasArea";
-import { Panel } from "../Panel/Panel";
 import { Scrollbar } from "../Scrollbar/Scrollbar";
 import { Navbar } from "../Navbar/Navbar";
 
@@ -38,7 +37,6 @@ export function App() {
         <Radial />
         <Cursor />
       </Canvas>
-      <Panel />
       <Navbar />
       <Scrollbar />
     </div>

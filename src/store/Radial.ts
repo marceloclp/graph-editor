@@ -1,6 +1,62 @@
+import { range } from "~/utils/range";
 import { Store } from "./Store";
 
+const RadialConfig = {
+  /** Number of squares in the radial. */
+  n: 6,
+
+  /** Inner circle radius. */
+  innerRadius: 40,
+  /** Outer circle radius. */
+  outerRadius: 140,
+
+  /** Inner circle stroke. */
+  innerStroke: 5,
+  /** Outer circle stroke. */
+  outerStroke: 6,
+
+  /** Square (the action item) radius. */
+  squareRadius: 10,
+  /** Square (the action item) size. */
+  squareSize: 50,
+  /** Mid point of the square. */
+  get squareMid() {
+    return this.squareSize / 2;
+  },
+
+  /** Icon size - we use this to center the icon inside the square. */
+  iconSize: 32,
+  /** Icon x0 position. */
+  get iconX() {
+    return (this.squareSize - this.iconSize) / 2;
+  },
+  /** Icon y0 position. */
+  get iconY() {
+    return (this.squareSize - this.iconSize) / 2;
+  },
+
+  /** How much to enlarge the end (from the outer circle) of the cone. */
+  coneEnlargeEnd: 40,
+  /** How much to enlarge the origin (from the inner circle) of the cone. */
+  coneEnlargeOrigin: 16,
+
+  /** Cached square positions. */
+  squarePositions: [] as { x: number; y: number }[],
+};
+
+RadialConfig.squarePositions = range(RadialConfig.n, (i) => {
+  const r = RadialConfig.outerRadius;
+  const mid = RadialConfig.squareMid;
+  const angle = Math.PI / 2 - (2 * Math.PI * i) / RadialConfig.n;
+  return {
+    x: r * Math.cos(angle) - mid,
+    y: -r * Math.sin(angle) - mid,
+  };
+});
+
 export class Radial {
+  public static readonly Config = RadialConfig;
+
   /**  */
   public rotation: number = 0;
 
@@ -101,82 +157,7 @@ export class Radial {
     return distRight < distLeft ? -distRight : distLeft;
   }
 
-  /**
-   * Return the square position props used to position the square around
-   * the radial, based on its index.
-   */
-  public static getSquarePosition(index: number) {
-    const { n, outerRadius: r, squareMid: mid, squareSize: s } = Radial.Config;
-    const angle = Math.PI / 2 - (2 * Math.PI * index) / n;
-
-    return {
-      x: r * Math.cos(angle) - mid,
-      y: -r * Math.sin(angle) - mid,
-      width: s,
-      height: s,
-    };
-  }
-
   private static isPressingActivationKey(ev: PointerEvent | KeyboardEvent) {
     return ev.metaKey;
   }
-
-  public static readonly Config = {
-    /** Number of squares in the radial. */
-    n: 7,
-
-    /** Inner circle radius. */
-    innerRadius: 40,
-    /** Outer circle radius. */
-    outerRadius: 140,
-
-    /** Inner circle stroke. */
-    innerStroke: 5,
-    /** Outer circle stroke. */
-    outerStroke: 6,
-
-    /** Square (the action item) radius. */
-    squareRadius: 10,
-    /** Square (the action item) size. */
-    squareSize: 50,
-    /** Mid point of the square. */
-    get squareMid() {
-      return this.squareSize / 2;
-    },
-
-    /** Icon size - we use this to center the icon inside the square. */
-    iconSize: 32,
-    /** Icon x0 position. */
-    get iconX() {
-      return (this.squareSize - this.iconSize) / 2;
-    },
-    /** Icon y0 position. */
-    get iconY() {
-      return (this.squareSize - this.iconSize) / 2;
-    },
-
-    /** How much to enlarge the end (from the outer circle) of the cone. */
-    coneEnlargeEnd: 40,
-    /** How much to enlarge the origin (from the inner circle) of the cone. */
-    coneEnlargeOrigin: 16,
-
-    get squarePositions() {
-      if (this["~squarePositions"]) {
-        return this["~squarePositions"];
-      }
-
-      const pos: { x: number; y: number }[] = [];
-
-      for (let i = 0; i < this.n; i++) {
-        pos.push(Radial.getSquarePosition(i));
-      }
-
-      this["~squarePositions"] = pos;
-      return pos;
-    },
-
-    // Cached square positions
-    // (~ places the property at the bottom during autocomplete)
-    "~squarePositions": null as { x: number; y: number }[] | null,
-  };
 }

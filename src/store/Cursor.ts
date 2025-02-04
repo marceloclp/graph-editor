@@ -7,7 +7,6 @@ export enum CursorType {
   EDGE_ADD = "EDGE_ADD",
   EDGE_REMOVE = "EDGE_REMOVE",
   EDGE_MOVE = "EDGE_MOVE",
-  INFO = "INFO",
 }
 
 export class Cursor {
@@ -125,7 +124,6 @@ export class Cursor {
         CursorType.EDGE_ADD,
         CursorType.EDGE_REMOVE,
         CursorType.EDGE_MOVE,
-        CursorType.INFO,
       ][index];
     }
   }

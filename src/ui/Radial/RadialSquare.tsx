@@ -49,6 +49,8 @@ export function RadialSquare({
         height={h}
         rx={r}
         ry={r}
+        x={0}
+        y={0}
         className={twMerge(
           "fill-white",
           "stroke-4",
