@@ -1,4 +1,4 @@
-import { clamp } from "~/utils/lamp";
+import { clamp } from "~/utils/clamp";
 
 export class Canvas {
   public panX: number = 0;

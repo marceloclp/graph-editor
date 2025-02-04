@@ -6,9 +6,10 @@ import { watch } from "valtio/utils";
 import { store } from "~/store/Store";
 import { match } from "ts-pattern";
 import { CursorType } from "~/store/Cursor";
-import { Circle, PathX } from "../GIcons/SVG";
-import { PathMinus } from "../GIcons/PathMinus";
-import { PathArrow } from "../GIcons/PathArrow";
+import { PathMinus } from "../SVG/PathMinus";
+import { PathArrow } from "../SVG/PathArrow";
+import { PathPlus } from "../SVG/PathPlus";
+import { Circle } from "../SVG/Circle";
 
 export function Cursor() {
   const {
@@ -69,7 +70,7 @@ function VertexAddIcon() {
   return (
     <motion.g style={{ x: 20, y: 20 }}>
       <Circle r={7} dashed={6} />
-      <PathX deg={0} l={10} dx={6} dy={6} />
+      <PathPlus l={10} dx={6} dy={6} />
     </motion.g>
   );
 }
@@ -106,7 +107,7 @@ function EdgeAddIcon() {
       <Circle r={5} cx={-8} cy={8} />
       {/* Top-right circle (2nd circle) */}
       <Circle r={5} cx={8} cy={-8} />
-      <PathX deg={0} l={10} dx={2} dy={2} />
+      <PathPlus l={10} dx={2} dy={2} />
     </motion.g>
   );
 }

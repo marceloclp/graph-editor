@@ -1,5 +1,4 @@
 import { twMerge } from "tailwind-merge";
-import { drawPlus, transform } from "~/utils/svg";
 
 export function Circle({
   className,
@@ -31,35 +30,6 @@ export function Circle({
         "stroke-3",
         "stroke-neutral-300",
         //
-        className
-      )}
-    />
-  );
-}
-
-export function PathX({
-  className,
-  deg = 45,
-  l = 16,
-  dx = 0,
-  dy = 0,
-}: {
-  className?: string;
-  deg?: number;
-  l?: number;
-  dx?: number;
-  dy?: number;
-}) {
-  return (
-    <path
-      transform={transform(dx, dy, deg)}
-      d={drawPlus(l, 0, 0)}
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      className={twMerge(
-        "fill-white",
-        "stroke-3",
-        "stroke-neutral-300",
         className
       )}
     />

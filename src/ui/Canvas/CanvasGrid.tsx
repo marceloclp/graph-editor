@@ -1,5 +1,5 @@
 import { Store } from "~/store/Store";
-import { path } from "~/utils/path";
+import { path } from "../SVG/svg-utils";
 
 const {
   squareWidth: sW,

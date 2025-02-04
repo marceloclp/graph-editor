@@ -2,7 +2,7 @@ import { motion } from "motion/react";
 import { twMerge } from "tailwind-merge";
 import { useSnapshot } from "valtio/react";
 import { Store, store } from "~/store/Store";
-import { path } from "~/utils/path";
+import { path } from "../SVG/svg-utils";
 
 const {
   n,

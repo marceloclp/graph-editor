@@ -1,6 +1,5 @@
 import { twMerge } from "tailwind-merge";
-import { path } from "~/utils/path";
-import { transform } from "~/utils/svg";
+import { path, transform } from "./svg-utils";
 
 export function PathArrow({
   className,
