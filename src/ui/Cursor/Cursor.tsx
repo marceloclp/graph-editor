@@ -1,4 +1,9 @@
-import { useMotionValue, motion, AnimatePresence } from "motion/react";
+import {
+  useMotionValue,
+  motion,
+  AnimatePresence,
+  LayoutGroup,
+} from "motion/react";
 import { Fragment, useEffect, useState } from "react";
 import { twMerge } from "tailwind-merge";
 import { useSnapshot } from "valtio/react";
@@ -65,12 +70,11 @@ export function Cursor() {
           </motion.g>
         )}
       </AnimatePresence>
-      <ClosestGridPoint />
     </Fragment>
   );
 }
 
-function ClosestGridPoint() {
+export function ClosestGridPoint() {
   const [origin, setOrigin] = useState<{
     x: number;
     y: number;
@@ -111,53 +115,69 @@ function ClosestGridPoint() {
     <AnimatePresence>
       {origin && (
         <motion.g
+          layout
           initial={{ scale: 0, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           exit={{ scale: 0, opacity: 0 }}
         >
-          {range(5, (i) => i)
-            .flatMap((row) =>
-              range(5, (col) => ({
-                x: origin.x + (col - 2) * w,
-                y: origin.y + (row - 2) * w,
-                distance: Math.sqrt(
-                  Math.pow(col - 2, 2) + Math.pow(row - 2, 2)
-                ),
+          <LayoutGroup>
+            {range(7, (i) => i)
+              .flatMap((row) =>
+                range(7, (col) => ({
+                  x: origin.x + (col - 3) * w,
+                  y: origin.y + (row - 3) * w,
+                  distance: Math.sqrt(
+                    Math.pow(col - 3, 2) + Math.pow(row - 3, 2)
+                  ),
+                }))
+              )
+              .map((obj) => ({
+                ...obj,
+                variant: (() => {
+                  if (obj.distance === 0 && !origin.isHovered) {
+                    return "visible";
+                  }
+                  if (obj.distance === 0 && origin.isHovered) {
+                    return "hovered";
+                  }
+                  if (obj.distance <= 2) {
+                    return "visible";
+                  }
+                  return "hidden";
+                })(),
               }))
-            )
-            .filter(({ distance }) => distance > 0 && distance <= 2)
-            .map(({ x, y, distance }) => (
-              <motion.circle
-                key={`${x},${y}`}
-                cx={x}
-                cy={y}
-                r={8}
-                className=" fill-neutral-200"
-                initial={{ opacity: 0, scale: 0 }}
-                animate={{
-                  opacity: 0.8,
-                  scale: Math.max(0, 1 - distance * 0.175),
-                }}
-                exit={{ opacity: 0, scale: 0 }}
-                transition={{ type: "spring", duration: 0.175 }}
-              />
-            ))}
-          <motion.circle
-            key={`${origin.x},${origin.y}`}
-            cx={origin.x}
-            cy={origin.y}
-            r={8}
-            initial={{ opacity: 0, scale: 0, fill: "var(--color-neutral-200)" }}
-            animate={{
-              opacity: 0.8,
-              scale: origin.isHovered ? 1.5 : 1,
-              fill: origin.isHovered
-                ? "var(--color-blue-400)"
-                : "var(--color-neutral-200)",
-            }}
-            exit={{ opacity: 0, scale: 0, fill: "var(--color-neutral-200)" }}
-            transition={{ type: "spring", duration: 0.175 }}
-          />
+              .map(({ x, y, distance, variant }) => (
+                <motion.circle
+                  layoutId={`${x},${y}`}
+                  key={`${x},${y}`}
+                  cx={x}
+                  cy={y}
+                  r={8}
+                  animate={variant}
+                  variants={{
+                    hidden: {
+                      opacity: 0,
+                      scale: 0,
+                      fill: "var(--color-neutral-200)",
+                    },
+                    visible: {
+                      opacity: 0.8,
+                      scale: Math.max(0, 1 - distance * 0.175),
+                      fill: "var(--color-neutral-200)",
+                    },
+                    hovered: {
+                      opacity: 0.8,
+                      scale: 1.4,
+                      fill: "var(--color-blue-500)",
+                      transition: {
+                        delay: 0.125,
+                      },
+                    },
+                  }}
+                  transition={{ type: "spring", duration: 1 }}
+                />
+              ))}
+          </LayoutGroup>
         </motion.g>
       )}
     </AnimatePresence>

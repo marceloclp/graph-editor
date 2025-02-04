@@ -5,7 +5,7 @@ import { Canvas } from "~/ui/Canvas/Canvas";
 import { CanvasGrid } from "../Canvas/CanvasGrid";
 import { onMount } from "~/store/Store";
 import { Radial } from "../Radial/Radial";
-import { Cursor } from "../Cursor/Cursor";
+import { ClosestGridPoint, Cursor } from "../Cursor/Cursor";
 import { CanvasArea } from "../Canvas/CanvasArea";
 import { Scrollbar } from "../Scrollbar/Scrollbar";
 import { Navbar } from "../Navbar/Navbar";
@@ -33,6 +33,7 @@ export function App() {
     >
       <Canvas>
         <CanvasGrid />
+        <ClosestGridPoint />
         <CanvasArea />
         <Radial />
         <Cursor />
