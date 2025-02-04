@@ -1,6 +1,6 @@
 import { Store } from "./Store";
 
-enum CursorType {
+export enum CursorType {
   ADD_POINT = "ADD_POINT",
   REMOVE_POINT = "REMOVE_POINT",
   CONNECT_POINT = "CONNECT_POINT",

@@ -41,6 +41,36 @@ export class Store {
   get isDraggingVertex() {
     return this.cursor.is(Store.Cursor.Type.VERTEX_MOVE);
   }
+
+  onType(handlers: {
+    onVertexAdd?: () => void;
+    onVertexRemove?: () => void;
+    onVertexMove?: () => void;
+    onEdgeAddStart?: () => void;
+    onEdgeAddEnd?: () => void;
+    onEdgeRemove?: () => void;
+    onEdgeMove?: () => void;
+  }) {
+    const Type = Store.Cursor.Type;
+    const type = this.cursor.type;
+    if (type === Type.ADD_POINT) {
+      handlers.onVertexAdd?.();
+    } else if (type === Type.REMOVE_POINT) {
+      handlers.onVertexRemove?.();
+    } else if (type === Type.VERTEX_MOVE) {
+      handlers.onVertexMove?.();
+    } else if (type === Type.CONNECT_POINT) {
+      if (!this.matrix.connectingVertexId) {
+        handlers.onEdgeAddStart?.();
+      } else if (this.matrix.connectingVertexId) {
+        handlers.onEdgeAddEnd?.();
+      }
+    } else if (type === Type.REMOVE_EDGE) {
+      handlers.onEdgeRemove?.();
+    } else if (type === Type.EDGE_MOVE) {
+      handlers.onEdgeMove?.();
+    }
+  }
 }
 
 export const store = proxy(new Store());

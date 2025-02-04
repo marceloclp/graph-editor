@@ -13,6 +13,7 @@ import { Scrollbar } from "../Scrollbar/Scrollbar";
 export function App() {
   return (
     <div
+      data-app
       ref={onMount}
       className={twMerge(
         "group/app",

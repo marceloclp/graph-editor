@@ -14,6 +14,8 @@ export class Matrix {
 
   public connectingVertexId?: string;
   public draggingVertexId?: string;
+  public hoveringVertexId?: string;
+  public hoveringEdgeId?: string;
   public draggingEdgeId?: string;
 
   /**
@@ -72,7 +74,24 @@ export class Matrix {
     return vertex;
   }
 
-  dragVertex(vertexId: string) {
+  /**
+   * Drags a vertex by a given (deltaX, deltaY) amount.
+   */
+  dragVertex(vertexId: string, deltaX: number, deltaY: number) {
+    const vertex = this.getVertex(vertexId);
+
+    if (!vertex) {
+      return;
+    }
+
+    vertex.dragX += deltaX;
+    vertex.dragY += deltaY;
+  }
+
+  /**
+   * Completes the vertex drag.
+   */
+  dragVertexEnd(vertexId: string) {
     const vertex = this.getVertex(vertexId);
 
     if (!vertex) {
@@ -81,6 +100,7 @@ export class Matrix {
 
     const prevPosId = vertex.posId;
 
+    // We want to snap the vertex to the closest grid point:
     const { x, y } = Store.Canvas.findClosestGridPoint(
       vertex.canvasX + vertex.dragX,
       vertex.canvasY + vertex.dragY,
@@ -162,15 +182,33 @@ export class Matrix {
     return edge;
   }
 
-  dragEdge(edgeId: string) {
+  /**
+   * Drags an edge by a given (deltaX, deltaY).
+   * Dragging an edge consists of dragging both of its vertices.
+   */
+  dragEdge(edgeId: string, deltaX: number, deltaY: number) {
     const edge = this.getEdge(edgeId);
 
     if (!edge) {
       return;
     }
 
-    this.dragVertex(edge.p1Id);
-    this.dragVertex(edge.p2Id);
+    this.getVertex(edge.p1Id).drag(deltaX, deltaY);
+    this.getVertex(edge.p2Id).drag(deltaX, deltaY);
+  }
+
+  /**
+   * Completes the edge drag.
+   */
+  dragEdgeEnd(edgeId: string) {
+    const edge = this.getEdge(edgeId);
+
+    if (!edge) {
+      return;
+    }
+
+    this.dragVertexEnd(edge.p1Id);
+    this.dragVertexEnd(edge.p2Id);
   }
 
   private hasEdgeBetween(v1: MatrixPoint, v2: MatrixPoint) {
@@ -178,6 +216,8 @@ export class Matrix {
   }
 
   public resetInteractive() {
-    this.connectingVertexId = undefined;
+    if (this.connectingVertexId) {
+      this.connectingVertexId = undefined;
+    }
   }
 }
