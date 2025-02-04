@@ -100,6 +100,7 @@ function onPointerUp(ev: PointerEvent) {
 
 function onKeyUp(ev: KeyboardEvent) {
   store.radial.onKeyUp(ev, store);
+  store.cursor.onKeyUp(ev);
 }
 
 export function onMount<T extends Element>(elem: T | null) {
@@ -118,10 +119,6 @@ export function onMount<T extends Element>(elem: T | null) {
     store.matrix.resetInteractive();
   });
 
-  const unsub2 = subscribeKey(store.radial, "isActive", (isActive) => {
-    if (isActive) store.cursor.setType();
-  });
-
   return () => {
     store.isMounted = false;
     window.removeEventListener("wheel", onWheel);
@@ -130,6 +127,5 @@ export function onMount<T extends Element>(elem: T | null) {
     window.removeEventListener("pointerup", onPointerUp);
     window.removeEventListener("keyup", onKeyUp);
     unsubscribe();
-    unsub2();
   };
 }

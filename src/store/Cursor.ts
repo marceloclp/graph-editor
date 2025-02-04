@@ -99,6 +99,12 @@ export class Cursor {
     this.dragY = 0;
   }
 
+  onKeyUp(ev: KeyboardEvent) {
+    if (ev.key === "Escape") {
+      this.setType();
+    }
+  }
+
   is(type?: CursorType) {
     return this.type === type;
   }

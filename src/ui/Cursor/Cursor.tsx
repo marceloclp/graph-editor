@@ -13,6 +13,7 @@ import { PathArrow } from "../GIcons/PathArrow";
 export function Cursor() {
   const {
     cursor: { isActive, type },
+    radial: { isActive: isRadialActive },
   } = useSnapshot(store);
 
   const x = useMotionValue(0);
@@ -44,17 +45,19 @@ export function Cursor() {
             cy={0}
             className={twMerge(
               "fill-neutral-300/60",
-              "group-has-data-[impossible=true]/app:fill-red-300/60"
+              "group-has-data-[impossible=true]/app:fill-red-300/60",
+              isRadialActive && "fill-blue-300/60"
             )}
           />
-          {match(type)
-            .with(CursorType.VERTEX_ADD, () => <VertexAddIcon />)
-            .with(CursorType.VERTEX_REMOVE, () => <VertexRemoveIcon />)
-            .with(CursorType.VERTEX_MOVE, () => <VertexMoveIcon />)
-            .with(CursorType.EDGE_ADD, () => <EdgeAddIcon />)
-            .with(CursorType.EDGE_REMOVE, () => <EdgeRemoveIcon />)
-            .with(CursorType.EDGE_MOVE, () => <EdgeMoveIcon />)
-            .otherwise(() => null)}
+          {!isRadialActive &&
+            match(type)
+              .with(CursorType.VERTEX_ADD, () => <VertexAddIcon />)
+              .with(CursorType.VERTEX_REMOVE, () => <VertexRemoveIcon />)
+              .with(CursorType.VERTEX_MOVE, () => <VertexMoveIcon />)
+              .with(CursorType.EDGE_ADD, () => <EdgeAddIcon />)
+              .with(CursorType.EDGE_REMOVE, () => <EdgeRemoveIcon />)
+              .with(CursorType.EDGE_MOVE, () => <EdgeMoveIcon />)
+              .otherwise(() => null)}
         </motion.g>
       )}
     </AnimatePresence>
