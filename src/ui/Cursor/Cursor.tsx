@@ -4,7 +4,7 @@ import {
   AnimatePresence,
   LayoutGroup,
 } from "motion/react";
-import { Fragment, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { twMerge } from "tailwind-merge";
 import { useSnapshot } from "valtio/react";
 import { watch } from "valtio/utils";
@@ -19,8 +19,7 @@ import { range } from "~/utils/range";
 
 export function Cursor() {
   const {
-    isMounted,
-    cursor: { type },
+    cursor: { type, isInitialized },
     radial: { isActive: isRadialActive },
   } = useSnapshot(store);
 
@@ -37,40 +36,38 @@ export function Cursor() {
   }, [x, y]);
 
   return (
-    <Fragment>
-      <AnimatePresence>
-        {isMounted && (
-          <motion.g
-            data-cursor
-            style={{ x, y }}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="pointer-events-none"
-          >
-            <motion.circle
-              r={16}
-              cx={0}
-              cy={0}
-              className={twMerge(
-                "fill-neutral-300/60",
-                "group-has-data-[impossible=true]/app:fill-red-300/60",
-                isRadialActive && "fill-blue-300/60"
-              )}
-            />
-            {!isRadialActive &&
-              match(type)
-                .with(CursorType.VERTEX_ADD, () => <VertexAddIcon />)
-                .with(CursorType.VERTEX_REMOVE, () => <VertexRemoveIcon />)
-                .with(CursorType.VERTEX_MOVE, () => <VertexMoveIcon />)
-                .with(CursorType.EDGE_ADD, () => <EdgeAddIcon />)
-                .with(CursorType.EDGE_REMOVE, () => <EdgeRemoveIcon />)
-                .with(CursorType.EDGE_MOVE, () => <EdgeMoveIcon />)
-                .otherwise(() => null)}
-          </motion.g>
-        )}
-      </AnimatePresence>
-    </Fragment>
+    <AnimatePresence>
+      {isInitialized && (
+        <motion.g
+          data-cursor
+          style={{ x, y }}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="pointer-events-none"
+        >
+          <motion.circle
+            r={16}
+            cx={0}
+            cy={0}
+            className={twMerge(
+              "fill-neutral-300/60",
+              "group-has-data-[impossible=true]/app:fill-red-300/60",
+              isRadialActive && "fill-blue-300/60"
+            )}
+          />
+          {!isRadialActive &&
+            match(type)
+              .with(CursorType.VERTEX_ADD, () => <VertexAddIcon />)
+              .with(CursorType.VERTEX_REMOVE, () => <VertexRemoveIcon />)
+              .with(CursorType.VERTEX_MOVE, () => <VertexMoveIcon />)
+              .with(CursorType.EDGE_ADD, () => <EdgeAddIcon />)
+              .with(CursorType.EDGE_REMOVE, () => <EdgeRemoveIcon />)
+              .with(CursorType.EDGE_MOVE, () => <EdgeMoveIcon />)
+              .otherwise(() => null)}
+        </motion.g>
+      )}
+    </AnimatePresence>
   );
 }
 
@@ -96,7 +93,7 @@ export function ClosestGridPoint() {
         canvasX,
         canvasY,
         // We use the full square width as the threshold to ensure we always get an origin:
-        Store.Canvas.Config.squareWidth
+        Store.Canvas.Config.squareSize
       )!;
 
       const point = Store.Canvas.findClosestGridPoint(canvasX, canvasY, 10);
@@ -109,7 +106,7 @@ export function ClosestGridPoint() {
     });
   }, []);
 
-  const w = Store.Canvas.Config.squareWidth;
+  const w = Store.Canvas.Config.squareSize;
 
   return (
     <AnimatePresence>
@@ -154,6 +151,16 @@ export function ClosestGridPoint() {
                   cy={y}
                   r={8}
                   animate={variant}
+                  initial={{
+                    opacity: 0,
+                    scale: 0,
+                    fill: "var(--color-neutral-200)",
+                  }}
+                  exit={{
+                    opacity: 0,
+                    scale: 0,
+                    fill: "var(--color-neutral-200)",
+                  }}
                   variants={{
                     hidden: {
                       opacity: 0,

@@ -94,10 +94,10 @@ export function Vertex({ id, x, y }: { id: string; x: number; y: number }) {
       initial={{ scale: 0 }}
       animate={{ scale: 1 }}
       exit={{ scale: 0 }}
-      onHoverStart={onVertexHoverStart}
-      onHoverEnd={onVertexHoverEnd}
-      onTap={onVertexTap}
-      onPointerDown={onVertexDragDown}
+      onHoverStart={onHoverStart}
+      onHoverEnd={onHoverEnd}
+      onTap={onTap}
+      onPointerDown={onPointerDown}
     >
       <motion.circle
         cx={0}
@@ -161,22 +161,22 @@ function getVertexIdFromEvent(ev: Event | React.SyntheticEvent) {
 /**
  *
  */
-function onVertexHoverStart(ev: MouseEvent) {
+function onHoverStart(ev: MouseEvent) {
   store.matrix.hoveringVertexId = getVertexIdFromEvent(ev);
 }
 
-/**
- *
- */
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-function onVertexHoverEnd(ev: MouseEvent) {
+function onHoverEnd(ev: MouseEvent) {
   store.matrix.hoveringVertexId = undefined;
 }
 
 /**
+ * Handle tapping a vertex to either:
  *
+ * - Remove the vertex
+ * - Connect two vertices to form an edge
  */
-function onVertexTap(ev: TapEvent) {
+function onTap(ev: TapEvent) {
   const vertexId = getVertexIdFromEvent(ev);
 
   // Handle tapping to remove the vertex:
@@ -202,9 +202,9 @@ function onVertexTap(ev: TapEvent) {
 }
 
 /**
- *
+ * Handle the start of the vertex dragging process.
  */
-function onVertexDragDown(ev: React.PointerEvent) {
+function onPointerDown(ev: React.PointerEvent) {
   if (!store.cursor.is(CursorType.VERTEX_MOVE)) return;
 
   // Skip if a vertex is somehow already being dragged:
@@ -212,30 +212,4 @@ function onVertexDragDown(ev: React.PointerEvent) {
   if (store.matrix.draggingVertexId) return;
 
   store.matrix.draggingVertexId = getVertexIdFromEvent(ev);
-}
-
-/**
- * Should be attached to `window.document`.
- */
-export function onVertexDragMove(ev: PointerEvent) {
-  if (!store.cursor.is(CursorType.VERTEX_MOVE)) return;
-  if (!store.matrix.draggingVertexId) return;
-
-  const deltaX = ev.movementX;
-  const deltaY = ev.movementY;
-  const vertexId = store.matrix.draggingVertexId;
-
-  store.matrix.dragVertex(vertexId, deltaX, deltaY);
-}
-
-/**
- * Should be attached to `window.document`.
- */
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-export function onVertexDragUp(ev: PointerEvent) {
-  if (!store.cursor.is(Store.Cursor.Type.VERTEX_MOVE)) return;
-  if (!store.matrix.draggingVertexId) return;
-
-  store.matrix.dragVertexEnd(store.matrix.draggingVertexId);
-  store.matrix.draggingVertexId = undefined;
 }

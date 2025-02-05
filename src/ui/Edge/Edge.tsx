@@ -85,10 +85,10 @@ export function Edge({
       key={id}
       id={id}
       className={twMerge("group/edge", "focus:outline-none")}
-      onTap={onEdgeTap}
-      onHoverStart={onEdgeHoverStart}
-      onHoverEnd={onEdgeHoverEnd}
-      onPointerDown={onEdgeDragDown}
+      onTap={onTap}
+      onHoverStart={onHoverStart}
+      onHoverEnd={onHoverEnd}
+      onPointerDown={onPointerDown}
     >
       <motion.line
         x1={x1}
@@ -133,25 +133,19 @@ function getEdgeIdFromEvent(ev: Event | React.SyntheticEvent) {
   return (ev.target as Element).closest("g")!.id!;
 }
 
-/**
- *
- */
-function onEdgeHoverStart(ev: MouseEvent) {
+function onHoverStart(ev: MouseEvent) {
   store.matrix.hoveringEdgeId = getEdgeIdFromEvent(ev);
 }
 
-/**
- *
- */
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-function onEdgeHoverEnd(ev: MouseEvent) {
+function onHoverEnd(ev: MouseEvent) {
   store.matrix.hoveringEdgeId = undefined;
 }
 
 /**
- *
+ * Handle tapping an edge.
  */
-function onEdgeTap(ev: TapEvent) {
+function onTap(ev: TapEvent) {
   const edgeId = getEdgeIdFromEvent(ev);
 
   // Handle tapping to remove the edge:
@@ -161,9 +155,9 @@ function onEdgeTap(ev: TapEvent) {
 }
 
 /**
- *
+ * Handle the start of the edge dragging process.
  */
-function onEdgeDragDown(ev: React.PointerEvent) {
+function onPointerDown(ev: React.PointerEvent) {
   if (!store.cursor.is(CursorType.EDGE_MOVE)) return;
 
   // Skip if an edge is somehow already being dragged:
@@ -171,30 +165,4 @@ function onEdgeDragDown(ev: React.PointerEvent) {
   if (store.matrix.draggingEdgeId) return;
 
   store.matrix.draggingEdgeId = getEdgeIdFromEvent(ev);
-}
-
-/**
- * Should be attached to `window.document`.
- */
-export function onEdgeDragMove(ev: PointerEvent) {
-  if (!store.cursor.is(CursorType.EDGE_MOVE)) return;
-  if (!store.matrix.draggingEdgeId) return;
-
-  const deltaX = ev.movementX;
-  const deltaY = ev.movementY;
-  const edgeId = store.matrix.draggingEdgeId;
-
-  store.matrix.dragEdge(edgeId, deltaX, deltaY);
-}
-
-/**
- * Should be attached to `window.document`.
- */
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-export function onEdgeDragUp(ev: PointerEvent) {
-  if (!store.cursor.is(CursorType.EDGE_MOVE)) return;
-  if (!store.matrix.draggingEdgeId) return;
-
-  store.matrix.dragEdgeEnd(store.matrix.draggingEdgeId);
-  store.matrix.draggingEdgeId = undefined;
 }

@@ -7,7 +7,7 @@ import { Store, store } from "~/store/Store";
 const { canvasHeight: cH, canvasWidth: cW } = Store.Canvas.Config;
 
 export function Canvas({ children }: { children?: ReactNode }) {
-  const { isMounted } = useSnapshot(store);
+  const { isInitialized } = useSnapshot(store);
   const panX = useMotionValue(0);
   const panY = useMotionValue(0);
 
@@ -23,7 +23,7 @@ export function Canvas({ children }: { children?: ReactNode }) {
 
   return (
     <AnimatePresence>
-      {isMounted && (
+      {isInitialized && (
         <motion.svg
           style={{ width: cW, height: cH }}
           initial={{ opacity: 0 }}

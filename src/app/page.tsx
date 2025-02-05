@@ -1,7 +1,5 @@
-"use client";
-
 import { App } from "~/ui/App/App";
 
-export default function Home() {
+export default function Index() {
   return <App />;
 }

@@ -3,23 +3,28 @@ import { path } from "../SVG/svg-utils";
 
 export function CanvasGrid() {
   const {
-    squareWidth: sW,
-    squareHeight: sH,
-    xAxisY,
-    yAxisX,
+    //
+    canvasWidth,
+    canvasHeight,
+    squareSize,
   } = Store.Canvas.Config;
 
   const d = path(
     //
-    `M ${sW} ${0}`,
+    `M ${squareSize} ${0}`,
     `L ${0} ${0}`,
-    `L ${0} ${sH}`
+    `L ${0} ${squareSize}`
   );
 
   return (
     <g className="pointer-events-none">
       <defs>
-        <pattern id="grid" width={sW} height={sH} patternUnits="userSpaceOnUse">
+        <pattern
+          id="grid"
+          width={squareSize}
+          height={squareSize}
+          patternUnits="userSpaceOnUse"
+        >
           <path d={d} className="stroke-neutral-200 fill-none" />
         </pattern>
       </defs>
@@ -33,7 +38,7 @@ export function CanvasGrid() {
         height="1"
         fill="none"
         x={0}
-        y={xAxisY}
+        y={canvasHeight / 2}
         className="stroke-neutral-200 stroke-2"
       />
 
@@ -42,7 +47,7 @@ export function CanvasGrid() {
         width="1"
         height="100%"
         fill="none"
-        x={yAxisX}
+        x={canvasWidth / 2}
         y={0}
         className="stroke-neutral-200 stroke-2"
       />

@@ -1,14 +1,9 @@
 import type { Metadata } from "next";
-import { Geist_Mono, Inter } from "next/font/google";
+import { PropsWithChildren } from "react";
+import { Geist_Mono } from "next/font/google";
 import "./globals.css";
-import { twMerge } from "tailwind-merge";
 
-const inter = Inter({
-  variable: "--font-inter",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
+const font = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
 });
@@ -18,22 +13,10 @@ export const metadata: Metadata = {
   description: "Visualize your graph data",
 };
 
-export default function RootLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+export default function Index({ children }: PropsWithChildren) {
   return (
-    <html lang="en" className={twMerge(inter.variable, geistMono.variable)}>
-      <body
-        className={twMerge(
-          //
-          "overscroll-none",
-          "overflow-hidden"
-        )}
-      >
-        {children}
-      </body>
+    <html lang="en" className={font.variable}>
+      <body className="overscroll-none overflow-hidden">{children}</body>
     </html>
   );
 }

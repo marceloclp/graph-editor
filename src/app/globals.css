@@ -1,7 +1,6 @@
 @import "tailwindcss";
 
 @theme {
-  --font-sans: var(--font-inter);
   --font-mono: var(--font-geist-mono);
 }
 
@@ -22,15 +21,3 @@
     border-color: var(--color-gray-200, currentColor);
   }
 }
-
-/* @custom-variant app-has-vertex-connecting-1 {
-  [data-app="true"]:has([data-vertex="true"][data-hovering="true"]) & {
-    @slot;
-  }
-}
-
-@custom-variant app-has-vertex-connecting-2 {
-  [data-app]:has([data-vertex][data-connecting]) {
-    @slot;
-  }
-} */

@@ -7,7 +7,7 @@ import { Fragment } from "react";
 
 export function Navbar() {
   const snap = useSnapshot(store);
-  const isMounted = snap.isMounted;
+  const isInitialized = snap.isInitialized;
   const isActive = snap.radial.isActive;
   const cursorType = snap.cursor.type;
 
@@ -23,7 +23,7 @@ export function Navbar() {
       )}
     >
       <AnimatePresence>
-        {isMounted && (
+        {isInitialized && (
           <motion.div
             initial={{ opacity: 0, scale: 0 }}
             animate={{ opacity: 1, scale: 1 }}

@@ -45,22 +45,18 @@ export function RadialCone() {
     radial: { rotation },
   } = useSnapshot(store);
 
-  const squareAngle = (2 * Math.PI * rotation) / n;
-  const squareAngleDeg = (squareAngle * 180) / Math.PI;
+  const deg = (((2 * Math.PI * rotation) / n) * 180) / Math.PI;
 
   return (
     <motion.path
       className={twMerge(
         "stroke-0",
-
         "fill-blue-400/20",
-
-        // "transition-all",
         "duration-150",
         "ease-in-out"
       )}
       d={d}
-      transform={`rotate(${squareAngleDeg})`}
+      transform={`rotate(${deg})`}
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
     />

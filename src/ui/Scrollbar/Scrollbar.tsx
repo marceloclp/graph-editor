@@ -29,7 +29,7 @@ export function Scrollbar() {
         )}
       >
         <div className="h-96 w-full pt-2 pb-4 px-1">
-          <div className="h-full w-full bg-neutral-400/25 rounded-full" />
+          <div className="h-full w-full bg-neutral-400/40 rounded-full" />
         </div>
       </motion.div>
 
@@ -44,7 +44,7 @@ export function Scrollbar() {
         )}
       >
         <div className="w-96 h-full py-1 pl-2 pr-4">
-          <div className="h-full w-full bg-neutral-400/25 rounded-full" />
+          <div className="h-full w-full bg-neutral-400/40 rounded-full" />
         </div>
       </motion.div>
     </Fragment>

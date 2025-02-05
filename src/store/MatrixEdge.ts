@@ -3,14 +3,7 @@ export class MatrixEdge {
 
   public readonly id = MatrixEdge.createId();
 
-  constructor(
-    public readonly p1Id: string,
-    public readonly p2Id: string,
-    // public readonly p1: MatrixPoint,
-    // public readonly p2: MatrixPoint
-    //
-    public x?: number
-  ) {}
+  constructor(public readonly p1Id: string, public readonly p2Id: string) {}
 
   public static createId() {
     return `edge:${MatrixEdge.idx++}`;

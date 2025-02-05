@@ -12,6 +12,7 @@ export enum CursorType {
 export class Cursor {
   public static readonly Type = CursorType;
 
+  /** The selected cursor action type. */
   public type?: CursorType;
 
   /** X coordinate inside the canvas. */
@@ -19,28 +20,13 @@ export class Cursor {
   /** Y coordinate inside the canvas. */
   public canvasY: number = 0;
 
+  /** X coordinate on the screen. */
   public screenX: number = 0;
+  /** Y coordinate on the screen. */
   public screenY: number = 0;
 
-  public isDragging: boolean = false;
-  public dragX: number = 0;
-  public dragY: number = 0;
-
-  get isActive() {
-    return this.type !== undefined;
-  }
-
-  get isAddingVertex() {
-    return this.type === CursorType.VERTEX_ADD;
-  }
-
-  get isRemovingVertex() {
-    return this.type === CursorType.VERTEX_REMOVE;
-  }
-
-  get isConnectingVertex() {
-    return this.type === CursorType.EDGE_ADD;
-  }
+  /** Whether the user has moved the cursor at least once. */
+  public isInitialized: boolean = false;
 
   public getClosestGridPoint(threshold: number = 10) {
     const x = this.canvasX;
@@ -49,71 +35,28 @@ export class Cursor {
     return Store.Canvas.findClosestGridPoint(x, y, threshold);
   }
 
-  /**
-   * Keep track of the cursor position on wheel event (2-fingers gesture).
-   */
-  onWheel(ev: WheelEvent, store: Store) {
-    this.screenX = ev.clientX;
-    this.screenY = ev.clientY;
+  public move(
+    /** The cursor's X coordinate on the screen. */
+    screenX: number,
+    /** The cursor's Y coordinate on the screen. */
+    screenY: number,
+    panX: number,
+    panY: number
+  ): void {
+    this.isInitialized = true;
 
-    this.canvasX = ev.clientX - store.canvas.panX;
-    this.canvasY = ev.clientY - store.canvas.panY;
+    this.screenX = screenX;
+    this.screenY = screenY;
+
+    this.canvasX = screenX - panX;
+    this.canvasY = screenY - panY;
   }
 
-  onResize(ev: UIEvent, store: Store) {
-    // Maintain cursor position relative to canvas after resize
-    this.canvasX = this.screenX - store.canvas.panX;
-    this.canvasY = this.screenY - store.canvas.panY;
-  }
-
-  /**
-   * Keep track of the cursor position on pointer move.
-   */
-  onPointerMove(ev: PointerEvent, store: Store) {
-    this.screenX = ev.clientX;
-    this.screenY = ev.clientY;
-
-    this.canvasX = ev.clientX - store.canvas.panX;
-    this.canvasY = ev.clientY - store.canvas.panY;
-
-    this.dragX += ev.movementX;
-    this.dragY += ev.movementY;
-  }
-
-  /**
-   * Because there are no elements in the canvas to attach event handlers
-   * to when listening for the ADD_VERTEX action, we need to find the closest
-   * grid point by doing some quick maths.
-   */
-  onPointerDown(ev: PointerEvent, store: Store) {
-    this.isDragging = true;
-    this.dragX = 0;
-    this.dragY = 0;
-
-    if (this.is(Cursor.Type.VERTEX_ADD) && !ev.metaKey) {
-      const point = this.getClosestGridPoint();
-      if (point) {
-        store.matrix.createVertex(point.x, point.y);
-      }
-    }
-  }
-
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  onPointerUp(ev: PointerEvent) {
-    this.isDragging = false;
-    this.dragX = 0;
-    this.dragY = 0;
-  }
-
-  onKeyUp(ev: KeyboardEvent) {
-    if (ev.key === "Escape") this.setType();
-  }
-
-  is(type?: CursorType) {
+  public is(type?: CursorType): boolean {
     return this.type === type;
   }
 
-  setType(index?: number) {
+  public setType(index?: number): void {
     if (typeof index === "undefined") {
       this.type = undefined;
     } else {
@@ -126,5 +69,13 @@ export class Cursor {
         CursorType.EDGE_MOVE,
       ][index];
     }
+  }
+
+  public cancel(): void {
+    this.type = undefined;
+  }
+
+  public static isPressingCancelKey(ev: KeyboardEvent): boolean {
+    return ev.key === "Escape";
   }
 }

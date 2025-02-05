@@ -1,5 +1,5 @@
 import { MatrixEdge } from "./MatrixEdge";
-import { MatrixPoint } from "./MatrixPoint";
+import { MatrixVertex } from "./MatrixVertex";
 import { Store } from "./Store";
 
 type Lookup<T> = Record<string, T>;
@@ -7,8 +7,8 @@ type AdjMatrix = Record<string, Record<string, boolean>>;
 
 export class Matrix {
   public readonly edgesById: Lookup<MatrixEdge> = {};
-  public readonly verticesById: Lookup<MatrixPoint> = {};
-  private readonly verticesByPosId: Lookup<MatrixPoint> = {};
+  public readonly verticesById: Lookup<MatrixVertex> = {};
+  private readonly verticesByPosId: Lookup<MatrixVertex> = {};
   private readonly vertexIdToEdgeIds: AdjMatrix = {};
   private readonly vertexIdToVertexId: AdjMatrix = {};
 
@@ -18,30 +18,27 @@ export class Matrix {
   public hoveringEdgeId?: string;
   public draggingEdgeId?: string;
 
-  /**
-   *
-   */
-  getVertex(id: string) {
+  public getVertex(id: string): MatrixVertex | undefined {
     return this.verticesById[id];
   }
 
-  getVertexAt(x: number, y: number) {
-    return this.verticesByPosId[MatrixPoint.createPosId(x, y)];
+  public getVertexAt(x: number, y: number): MatrixVertex | undefined {
+    return this.verticesByPosId[MatrixVertex.createPosId(x, y)];
   }
 
   /**
    *
    */
-  createVertex(x: number, y: number): MatrixPoint | undefined {
+  public createVertex(x: number, y: number): MatrixVertex | undefined {
     // 1. Verify that a vertex doesn't exist at this point yet:
-    const posId = MatrixPoint.createPosId(x, y);
+    const posId = MatrixVertex.createPosId(x, y);
 
     if (posId in this.verticesByPosId) {
       return undefined;
     }
 
     // 2. Create the vertex:
-    const vertex = new MatrixPoint(x, y);
+    const vertex = new MatrixVertex(x, y);
 
     // 3. Add the vertex to the lookup tables:
     this.verticesById[vertex.id] = vertex;
@@ -57,7 +54,7 @@ export class Matrix {
   /**
    *
    */
-  removeVertex(vertexId: string): MatrixPoint | undefined {
+  public removeVertex(vertexId: string): MatrixVertex | undefined {
     // 1. Verify that the vertex exists:
     const vertex = this.verticesById[vertexId];
 
@@ -81,7 +78,7 @@ export class Matrix {
   /**
    * Drags a vertex by a given (deltaX, deltaY) amount.
    */
-  dragVertex(vertexId: string, deltaX: number, deltaY: number) {
+  public dragVertex(vertexId: string, deltaX: number, deltaY: number): void {
     const vertex = this.getVertex(vertexId);
 
     if (!vertex) {
@@ -95,7 +92,7 @@ export class Matrix {
   /**
    * Completes the vertex drag.
    */
-  dragVertexEnd(vertexId: string) {
+  public dragVertexEnd(vertexId: string): void {
     const vertex = this.getVertex(vertexId);
 
     if (!vertex) {
@@ -109,7 +106,7 @@ export class Matrix {
       vertex.canvasX + vertex.dragX,
       vertex.canvasY + vertex.dragY,
       // We use a slightly larger threshold to ensure we always get a point:
-      Store.Canvas.Config.squareWidth + 10
+      Store.Canvas.Config.squareSize + 10
     )!;
 
     vertex.canvasX = x;
@@ -126,14 +123,17 @@ export class Matrix {
   /**
    *
    */
-  getEdge(id: string) {
+  public getEdge(id: string): MatrixEdge | undefined {
     return this.edgesById[id];
   }
 
   /**
    *
    */
-  createEdge(v1: MatrixPoint, v2: MatrixPoint): MatrixEdge | undefined {
+  public createEdge(
+    v1: MatrixVertex,
+    v2: MatrixVertex
+  ): MatrixEdge | undefined {
     // 1. Verify that we are not trying to connect the same vertex to itself:
     if (v1.id === v2.id) {
       return undefined;
@@ -164,7 +164,7 @@ export class Matrix {
   /**
    *
    */
-  removeEdge(edgeId: string): MatrixEdge | undefined {
+  public removeEdge(edgeId: string): MatrixEdge | undefined {
     // 1. Verify that the edge exists:
     const edge = this.edgesById[edgeId];
 
@@ -190,21 +190,21 @@ export class Matrix {
    * Drags an edge by a given (deltaX, deltaY).
    * Dragging an edge consists of dragging both of its vertices.
    */
-  dragEdge(edgeId: string, deltaX: number, deltaY: number) {
+  public dragEdge(edgeId: string, deltaX: number, deltaY: number): void {
     const edge = this.getEdge(edgeId);
 
     if (!edge) {
       return;
     }
 
-    this.getVertex(edge.p1Id).drag(deltaX, deltaY);
-    this.getVertex(edge.p2Id).drag(deltaX, deltaY);
+    this.getVertex(edge.p1Id)?.drag(deltaX, deltaY);
+    this.getVertex(edge.p2Id)?.drag(deltaX, deltaY);
   }
 
   /**
    * Completes the edge drag.
    */
-  dragEdgeEnd(edgeId: string) {
+  public dragEdgeEnd(edgeId: string): void {
     const edge = this.getEdge(edgeId);
 
     if (!edge) {
@@ -215,13 +215,15 @@ export class Matrix {
     this.dragVertexEnd(edge.p2Id);
   }
 
-  private hasEdgeBetween(v1: MatrixPoint, v2: MatrixPoint) {
-    return this.vertexIdToVertexId[v1.id][v2.id];
+  public resetInteractions(): void {
+    this.connectingVertexId = undefined;
+    this.draggingVertexId = undefined;
+    this.hoveringVertexId = undefined;
+    this.hoveringEdgeId = undefined;
+    this.draggingEdgeId = undefined;
   }
 
-  public resetInteractive() {
-    if (this.connectingVertexId) {
-      this.connectingVertexId = undefined;
-    }
+  private hasEdgeBetween(v1: MatrixVertex, v2: MatrixVertex): boolean {
+    return this.vertexIdToVertexId[v1.id][v2.id];
   }
 }

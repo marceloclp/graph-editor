@@ -1,12 +1,12 @@
-export class MatrixPoint {
+export class MatrixVertex {
   private static idx = 0;
 
   /** Stable id, used to connect entities together (eg., edges). */
-  public readonly id = MatrixPoint.createId();
+  public readonly id = MatrixVertex.createId();
 
   /** String representation of the point's position for quick lookup. */
   get posId() {
-    return MatrixPoint.createPosId(this.canvasX, this.canvasY);
+    return MatrixVertex.createPosId(this.canvasX, this.canvasY);
   }
 
   constructor(
@@ -19,13 +19,13 @@ export class MatrixPoint {
   public dragX: number = 0;
   public dragY: number = 0;
 
-  drag(deltaX: number, deltaY: number) {
+  public drag(deltaX: number, deltaY: number): void {
     this.dragX += deltaX;
     this.dragY += deltaY;
   }
 
   public static createId() {
-    return `point:${MatrixPoint.idx++}`;
+    return `point:${MatrixVertex.idx++}`;
   }
 
   public static createPosId(x: number, y: number) {
