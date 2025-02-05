@@ -16,12 +16,6 @@ export class Store {
   public readonly radial = new Radial();
 
   public isInitialized: boolean = false;
-
-  getCanvasPoint(x: number, y: number) {
-    const canvasX = x - this.canvas.panX;
-    const canvasY = y - this.canvas.panY;
-    return { x: canvasX, y: canvasY };
-  }
 }
 
 export const store = proxy(new Store());
