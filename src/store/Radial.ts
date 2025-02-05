@@ -1,8 +1,17 @@
 import { range } from "~/utils/range";
+import { VertexAddIcon } from "~/ui/Icons/VertexAddIcon";
+import { VertexRemoveIcon } from "~/ui/Icons/VertexRemoveIcon";
+import { VertexMoveIcon } from "~/ui/Icons/VertexMoveIcon";
+import { EdgeAddIcon } from "~/ui/Icons/EdgeAddIcon";
+import { EdgeRemoveIcon } from "~/ui/Icons/EdgeRemoveIcon";
+import { EdgeMoveIcon } from "~/ui/Icons/EdgeMoveIcon";
+import { FC } from "react";
 
 const RadialConfig = {
   /** Number of squares in the radial. */
-  n: 6,
+  get n() {
+    return this.actions.length;
+  },
 
   /** Inner circle radius. */
   innerRadius: 40,
@@ -43,12 +52,12 @@ const RadialConfig = {
   squarePositions: [] as { x: number; y: number; angle: number }[],
 
   actions: [
-    { name: "Add vertex" },
-    { name: "Remove vertex" },
-    { name: "Move vertex" },
-    { name: "Add edge" },
-    { name: "Remove edge" },
-    { name: "Move edge" },
+    createAction("Add vertex", VertexAddIcon),
+    createAction("Remove vertex", VertexRemoveIcon),
+    createAction("Move vertex", VertexMoveIcon),
+    createAction("Add edge", EdgeAddIcon),
+    createAction("Remove edge", EdgeRemoveIcon),
+    createAction("Move edge", EdgeMoveIcon),
   ],
 };
 
@@ -86,9 +95,6 @@ export class Radial {
 
   /** Track the radial rotation based on the current cursor position. */
   rotate(cursorX: number, cursorY: number) {
-    // Skip updating if the radial is not active:
-    if (!this.isActive) return;
-
     // Get the cursor position relative to the origin of the radial:
     const relX = cursorX - this.canvasX;
     const relY = cursorY - this.canvasY;
@@ -155,4 +161,8 @@ export class Radial {
   public static isPressingActivationKey(ev: KeyboardEvent): boolean {
     return ev.metaKey;
   }
+}
+
+function createAction(name: string, Icon: FC) {
+  return { name, Icon };
 }

@@ -3,12 +3,6 @@ import { useSnapshot } from "valtio/react";
 import { Store, store } from "~/store/Store";
 import { RadialCone } from "./RadialCone";
 import { RadialSquare } from "./RadialSquare";
-import { VertexAddIcon } from "../Icons/VertexAddIcon";
-import { VertexRemoveIcon } from "../Icons/VertexRemoveIcon";
-import { EdgeAddIcon } from "../Icons/EdgeAddIcon";
-import { EdgeRemoveIcon } from "../Icons/EdgeRemoveIcon";
-import { VertexMoveIcon } from "../Icons/VertexMoveIcon";
-import { EdgeMoveIcon } from "../Icons/EdgeMoveIcon";
 
 const {
   //
@@ -16,6 +10,7 @@ const {
   outerRadius,
   innerStroke,
   outerStroke,
+  actions,
 } = Store.Radial.Config;
 
 export function Radial() {
@@ -37,15 +32,9 @@ export function Radial() {
           />
 
           <RadialCone />
-          {[
-            VertexAddIcon,
-            VertexRemoveIcon,
-            VertexMoveIcon,
-            EdgeAddIcon,
-            EdgeRemoveIcon,
-            EdgeMoveIcon,
-          ].map((Icon, index) => (
-            <RadialSquare key={index} index={index} Icon={Icon} />
+
+          {actions.map((action, index) => (
+            <RadialSquare key={action.name} index={index} Icon={action.Icon} />
           ))}
 
           {/* Inner circle - must stay above all other elements. */}

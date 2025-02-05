@@ -5,13 +5,14 @@ import { Canvas } from "~/ui/Canvas/Canvas";
 import { CanvasGrid } from "../Canvas/CanvasGrid";
 import { Store, store } from "~/store/Store";
 import { Radial } from "../Radial/Radial";
-import { ClosestGridPoint, Cursor } from "../Cursor/Cursor";
+import { Cursor } from "../Cursor/Cursor";
 import { CanvasArea } from "../Canvas/CanvasArea";
 import { Scrollbar } from "../Scrollbar/Scrollbar";
 import { Navbar } from "../Navbar/Navbar";
 import { CursorType } from "~/store/Cursor";
 import { subscribeKey } from "valtio/utils";
 import { addListener } from "~/utils/addListener";
+import { VertexGrid } from "../Vertex/VertexGrid";
 
 export function App() {
   return (
@@ -37,7 +38,7 @@ export function App() {
     >
       <Canvas>
         <CanvasGrid />
-        <ClosestGridPoint />
+        <VertexGrid />
         <CanvasArea />
         <Radial />
         <Cursor />
@@ -92,22 +93,24 @@ function onPointerMove(ev: PointerEvent | MouseEvent) {
   const panX = store.canvas.panX;
   const panY = store.canvas.panY;
 
-  // 1. Track the cursor position:
+  // Track the cursor position:
   store.cursor.move(screenX, screenY, panX, panY);
 
   const cursorX = store.cursor.canvasX;
   const cursorY = store.cursor.canvasY;
 
-  // 2. Rotate the radial (if active):
-  store.radial.rotate(cursorX, cursorY);
+  if (store.radial.isActive) {
+    // Rotate the radial:
+    store.radial.rotate(cursorX, cursorY);
+  }
 
-  // 3. Update the dragging vertex (if a vertex is being dragged):
+  // Update the dragging vertex (if a vertex is being dragged):
   const draggingVertexId = store.matrix.draggingVertexId;
   if (draggingVertexId) {
     store.matrix.dragVertex(draggingVertexId, deltaX, deltaY);
   }
 
-  // 4. Update the dragging edge (if an edge is being dragged):
+  // Update the dragging edge (if an edge is being dragged):
   const draggingEdgeId = store.matrix.draggingEdgeId;
   if (draggingEdgeId) {
     store.matrix.dragEdge(draggingEdgeId, deltaX, deltaY);
@@ -116,6 +119,13 @@ function onPointerMove(ev: PointerEvent | MouseEvent) {
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 function onPointerDown(ev: PointerEvent | MouseEvent) {
+  if (store.radial.isActive) {
+    // If the user presses down while the radial is active,
+    // we auto-close the radial for better UX, since the user may not
+    // know that he just needs to release the Meta key.
+    store.radial.close();
+  }
+
   // Add a vertex (if in VERTEX_ADD mode):
   const isAddingVertex = store.cursor.is(CursorType.VERTEX_ADD);
   if (isAddingVertex) {
@@ -165,6 +175,12 @@ function onKeyUp(ev: KeyboardEvent) {
   }
 }
 
+function onRadialActiveIndexChange() {
+  return subscribeKey(store.radial, "activeIndex", () => {
+    store.cursor.setType(store.radial.activeIndex);
+  });
+}
+
 function onCursorTypeChange() {
   return subscribeKey(store.cursor, "type", () => {
     store.matrix.resetInteractions();
@@ -184,6 +200,7 @@ function onMount() {
     addListener("keydown", onKeyDown),
     addListener("keyup", onKeyUp),
 
+    onRadialActiveIndexChange(),
     onCursorTypeChange(),
   ];
 

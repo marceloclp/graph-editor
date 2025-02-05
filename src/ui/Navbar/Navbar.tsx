@@ -1,8 +1,7 @@
 import { twMerge } from "tailwind-merge";
 import { useSnapshot } from "valtio";
-import { store } from "~/store/Store";
+import { Store, store } from "~/store/Store";
 import { AnimatePresence, motion } from "framer-motion";
-import { CursorType } from "~/store/Cursor";
 import { Fragment } from "react";
 
 export function Navbar() {
@@ -47,27 +46,24 @@ export function Navbar() {
           >
             <Item
               isActive={isActive}
-              name="Radial"
-              cmd="Cmd + Click"
+              cmd="Hold CMD"
               className="rounded-tr-md rounded-br-md"
-            />
+            >
+              Radial
+            </Item>
             <Item
               isActive={false}
-              name={
-                cursorType
-                  ? {
-                      [CursorType.VERTEX_ADD]: "Action: Add Vertex",
-                      [CursorType.VERTEX_REMOVE]: "Action: Remove Vertex",
-                      [CursorType.VERTEX_MOVE]: "Action: Move Vertex",
-                      [CursorType.EDGE_ADD]: "Action: Add Edge",
-                      [CursorType.EDGE_REMOVE]: "Action: Remove Edge",
-                      [CursorType.EDGE_MOVE]: "Action: Move Edge",
-                    }[cursorType]
-                  : "Action: None"
-              }
               cmd={cursorType ? "Esc to cancel" : undefined}
               className="rounded-tl-md rounded-bl-md"
-            />
+            >
+              {"Action: "}
+              {!snap.cursor.type && "none"}
+              {snap.cursor.type && (
+                <span className="text-blue-500/90">
+                  {Store.Radial.Config.actions[snap.radial.activeIndex].name}
+                </span>
+              )}
+            </Item>
           </motion.div>
         )}
       </AnimatePresence>
@@ -77,24 +73,24 @@ export function Navbar() {
 
 function Item({
   className,
+  children,
   isActive,
-  name,
   cmd,
 }: {
   className?: string;
+  children?: React.ReactNode;
   isActive?: boolean;
-  name: string;
   cmd?: string;
 }) {
   return (
     <motion.div
       className={twMerge(
-        "bg-neutral-100 px-3 py-1.5 flex items-center gap-2",
-        "rounded-tl-2xl",
-        "rounded-bl-2xl",
-        "rounded-tr-2xl",
-        "rounded-br-2xl",
-        // "rounded-tl-full",
+        "flex items-center gap-2",
+
+        "px-3 py-1.5",
+        "rounded-2xl",
+
+        "bg-neutral-100",
 
         className
       )}
@@ -124,7 +120,7 @@ function Item({
           )}
         />
       </div>
-      <span>{name}</span>
+      <span>{children}</span>
       {cmd && (
         <Fragment>
           <span>|</span>

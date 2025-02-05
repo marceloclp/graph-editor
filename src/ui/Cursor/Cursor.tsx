@@ -1,21 +1,15 @@
-import {
-  useMotionValue,
-  motion,
-  AnimatePresence,
-  LayoutGroup,
-} from "motion/react";
-import { useEffect, useState } from "react";
+import { useMotionValue, motion, AnimatePresence } from "motion/react";
+import { useEffect } from "react";
 import { twMerge } from "tailwind-merge";
 import { useSnapshot } from "valtio/react";
 import { watch } from "valtio/utils";
-import { Store, store } from "~/store/Store";
+import { store } from "~/store/Store";
 import { match } from "ts-pattern";
 import { CursorType } from "~/store/Cursor";
 import { PathMinus } from "../SVG/PathMinus";
 import { PathArrow } from "../SVG/PathArrow";
 import { PathPlus } from "../SVG/PathPlus";
 import { Circle } from "../SVG/Circle";
-import { range } from "~/utils/range";
 
 export function Cursor() {
   const {
@@ -65,126 +59,6 @@ export function Cursor() {
               .with(CursorType.EDGE_REMOVE, () => <EdgeRemoveIcon />)
               .with(CursorType.EDGE_MOVE, () => <EdgeMoveIcon />)
               .otherwise(() => null)}
-        </motion.g>
-      )}
-    </AnimatePresence>
-  );
-}
-
-export function ClosestGridPoint() {
-  const [origin, setOrigin] = useState<{
-    x: number;
-    y: number;
-    isHovered?: boolean;
-  }>();
-
-  useEffect(() => {
-    return watch((get) => {
-      const isRadialActive = get(store).radial.isActive;
-      const cursorType = get(store).cursor.type;
-      const canvasX = get(store).cursor.canvasX;
-      const canvasY = get(store).cursor.canvasY;
-
-      if (cursorType !== CursorType.VERTEX_ADD || isRadialActive) {
-        return setOrigin(undefined);
-      }
-
-      const origin = Store.Canvas.findClosestGridPoint(
-        canvasX,
-        canvasY,
-        // We use the full square width as the threshold to ensure we always get an origin:
-        Store.Canvas.Config.squareSize
-      )!;
-
-      const point = Store.Canvas.findClosestGridPoint(canvasX, canvasY, 10);
-
-      setOrigin({
-        x: origin.x,
-        y: origin.y,
-        isHovered: !!point,
-      });
-    });
-  }, []);
-
-  const w = Store.Canvas.Config.squareSize;
-
-  return (
-    <AnimatePresence>
-      {origin && (
-        <motion.g
-          layout
-          initial={{ scale: 0, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          exit={{ scale: 0, opacity: 0 }}
-        >
-          <LayoutGroup>
-            {range(7, (i) => i)
-              .flatMap((row) =>
-                range(7, (col) => ({
-                  x: origin.x + (col - 3) * w,
-                  y: origin.y + (row - 3) * w,
-                  distance: Math.sqrt(
-                    Math.pow(col - 3, 2) + Math.pow(row - 3, 2)
-                  ),
-                }))
-              )
-              .map((obj) => ({
-                ...obj,
-                variant: (() => {
-                  if (obj.distance === 0 && !origin.isHovered) {
-                    return "visible";
-                  }
-                  if (obj.distance === 0 && origin.isHovered) {
-                    return "hovered";
-                  }
-                  if (obj.distance <= 2) {
-                    return "visible";
-                  }
-                  return "hidden";
-                })(),
-              }))
-              .map(({ x, y, distance, variant }) => (
-                <motion.circle
-                  layoutId={`${x},${y}`}
-                  key={`${x},${y}`}
-                  cx={x}
-                  cy={y}
-                  r={8}
-                  animate={variant}
-                  initial={{
-                    opacity: 0,
-                    scale: 0,
-                    fill: "var(--color-neutral-200)",
-                  }}
-                  exit={{
-                    opacity: 0,
-                    scale: 0,
-                    fill: "var(--color-neutral-200)",
-                  }}
-                  variants={{
-                    hidden: {
-                      opacity: 0,
-                      scale: 0,
-                      fill: "var(--color-neutral-200)",
-                    },
-                    visible: {
-                      opacity: 0.8,
-                      scale: Math.max(0, 1 - distance * 0.175),
-                      fill: "var(--color-neutral-200)",
-                    },
-                    hovered: {
-                      opacity: 0.8,
-                      scale: 1.4,
-                      fill: "var(--color-blue-500)",
-                      transition: {
-                        delay: 0.125,
-                      },
-                    },
-                  }}
-                  transition={{ type: "spring", duration: 1 }}
-                />
-              ))}
-          </LayoutGroup>
         </motion.g>
       )}
     </AnimatePresence>
